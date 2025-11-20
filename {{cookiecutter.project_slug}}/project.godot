@@ -1,0 +1,24 @@
+config_version=5
+
+[application]
+
+config/name="{{cookiecutter.project_name}}"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("{{cookiecutter.godot_version}}", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1152
+window/size/viewport_height=648
+window/stretch/mode="canvas_items"
+
+[layer_names]
+
+2d_physics/layer_1="World"
+2d_physics/layer_2="Player"
+2d_physics/layer_3="Collectibles"
+
+[rendering]
+
+renderer/rendering_method="mobile"
