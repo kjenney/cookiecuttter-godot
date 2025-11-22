@@ -1,0 +1,66 @@
+extends Control
+
+signal player_selected(player_type: String)
+
+# Available player types from cookiecutter configuration
+var available_types = "{{ cookiecutter.player_types }}".split(",")
+var selected_player = available_types[0] if available_types.size() > 0 else "blue"
+
+var buttons = {}
+
+func _ready():
+	print("PlayerSelect menu ready!")
+	print("Process mode: ", process_mode)
+	print("Available player types: ", available_types)
+	
+	# Create buttons dynamically based on available types
+	_create_ui()
+	_update_selection()
+
+func _create_ui():
+	# Get the VBoxContainer
+	var vbox = $VBoxContainer
+	
+	# Clear any existing buttons (except title)
+	for child in vbox.get_children():
+		if child.name != "Title":
+			child.queue_free()
+	
+	# Create a button for each available player type
+	for player_type in available_types:
+		var button = Button.new()
+		button.text = player_type.capitalize() + " Player"
+		button.custom_minimum_size = Vector2(200, 40)
+		button.name = player_type.capitalize() + "Button"
+		button.pressed.connect(_on_player_button_pressed.bind(player_type))
+		vbox.add_child(button)
+		buttons[player_type] = button
+		print("Created button for: ", player_type)
+	
+	# Create Start Game button
+	var start_button = Button.new()
+	start_button.text = "Start Game"
+	start_button.custom_minimum_size = Vector2(200, 50)
+	start_button.name = "StartButton"
+	start_button.pressed.connect(_on_start_pressed)
+	vbox.add_child(start_button)
+	print("All buttons created!")
+
+func _on_player_button_pressed(player_type: String):
+	print(player_type.capitalize(), " button pressed!")
+	selected_player = player_type
+	_update_selection()
+
+func _update_selection():
+	# Update button text to show selection with [SELECTED] marker
+	for player_type in available_types:
+		if player_type in buttons:
+			var marker = " [SELECTED]" if selected_player == player_type else ""
+			buttons[player_type].text = player_type.capitalize() + " Player" + marker
+	print("Selection updated to: ", selected_player)
+
+func _on_start_pressed():
+	print("Start button pressed! Emitting signal with player type: ", selected_player)
+	player_selected.emit(selected_player)
+	print("Signal emitted, removing menu...")
+	queue_free()
