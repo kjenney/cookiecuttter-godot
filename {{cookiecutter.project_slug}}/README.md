@@ -12,9 +12,11 @@ This is a basic 2D game where you control a character that moves around collecti
 
 1. Open this project in Godot {{cookiecutter.godot_version}} or later
 2. Press F5 or click the Play button
-3. Use WASD or Arrow keys to move your character
-4. Collect the golden objects scattered around the level
-5. Watch your score increase in the console output
+3. Select your player type (Blue, Red, or Green) from the menu
+4. Click "Start Game" to begin
+5. Use WASD or Arrow keys to move your character
+6. Collect the golden objects scattered around the level
+7. Watch your score increase in the console output
 
 ## Project Structure
 
@@ -22,10 +24,12 @@ This is a basic 2D game where you control a character that moves around collecti
   - `player.tscn` - The player character
   - `collectible.tscn` - Collectible objects
   - `main.tscn` - Main game scene
+  - `player_select.tscn` - Player selection menu
 - `scripts/` - Contains all GDScript files (.gd)
   - `player.gd` - Player movement logic
   - `collectible.gd` - Collectible behavior
   - `game_manager.gd` - Game state and score tracking
+  - `player_select.gd` - Player selection menu logic
 - `assets/` - Place your game assets here (sprites, sounds, etc.)
 
 ## Next Steps

@@ -4,6 +4,7 @@ A CookieCutter template for creating a simple 2D game in Godot 4 with a characte
 
 ## Features
 
+- **Player Selection**: Choose between different player types (Blue, Red, Green) at game start
 - **Player Character**: CharacterBody2D with WASD/Arrow key movement
 - **Collectible Objects**: Area2D objects that disappear when collected
 - **Score Tracking**: Basic game manager with score system
@@ -28,14 +29,17 @@ pip install cookiecutter
 Create a new project from this template:
 
 ```bash
-cookiecutter /Users/kjenney/devel/godot/godot_antigravity
+cookiecutter .
 ```
 
 You'll be prompted to enter:
 - **project_name**: Display name of your game (e.g., "My Awesome Game")
 - **project_slug**: Folder name for your project (e.g., "my_awesome_game")
 - **author_name**: Your name
-- **godot_version**: Godot version (default: "4.0")
+- **godot_version**: Godot version (default: "4.5")
+- **player_types**: Comma-separated list of player types available in-game (default: "blue,red,green")
+  - Examples: "blue,red,green", "red,blue", "blue", "warrior,mage,rogue"
+  - The in-game menu will dynamically show only these options
 
 ## Project Structure
 
@@ -46,10 +50,12 @@ your_project/
 ├── scenes/               # Scene files (.tscn)
 │   ├── player.tscn      # Player character scene
 │   ├── collectible.tscn # Collectible object scene
+│   ├── player_select.tscn # Player selection menu
 │   └── main.tscn        # Main game scene
 ├── scripts/             # GDScript files (.gd)
 │   ├── player.gd        # Player movement logic
 │   ├── collectible.gd   # Collectible behavior
+│   ├── player_select.gd # Player selection menu logic
 │   └── game_manager.gd  # Score tracking and game state
 └── assets/              # Game assets (images, sounds, etc.)
 ```
@@ -58,9 +64,11 @@ your_project/
 
 1. Open the generated project in Godot 4
 2. Press F5 or click the Play button to run the game
-3. Use WASD or Arrow keys to move the player
-4. Collect the golden objects to increase your score
-5. Check the console output to see your score
+3. Select your preferred player type (Blue, Red, or Green)
+4. Click "Start Game" to begin
+5. Use WASD or Arrow keys to move the player
+6. Collect the golden objects to increase your score
+7. Check the console output to see your score
 
 ## Customization Ideas
 

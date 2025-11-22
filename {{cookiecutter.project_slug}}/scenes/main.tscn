@@ -13,6 +13,7 @@ offset_bottom = 648.0
 color = Color(0.1, 0.1, 0.1, 1)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
+process_mode = 1
 position = Vector2(576, 324)
 
 [node name="Collectible1" parent="." instance=ExtResource("2_collectible")]
