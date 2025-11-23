@@ -91,6 +91,15 @@ your_project/
 - **Levels**: Design multiple levels with different layouts
 - **Power-ups**: Add special collectibles that give temporary abilities
 
+## Testing
+
+The template includes unit tests in the `tests/` folder using a minimal GUT (Godot Unit Test) stub. To run tests with full functionality:
+
+1. Install the GUT addon from Godot's AssetLib (search for "GUT") or from [GitHub](https://github.com/bitwes/Gut)
+2. Replace the `addons/gut/` folder with the full GUT addon
+3. Enable the plugin in Project Settings > Plugins
+4. Run tests via the GUT panel
+
 ## Controls
 
 - **Arrow Keys** or **WASD**: Move the player character
