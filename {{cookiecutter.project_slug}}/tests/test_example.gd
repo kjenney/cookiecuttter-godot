@@ -36,9 +36,8 @@ func test_signal_emission():
 	test_signal.emit(42)
 	
 	# Verify it was emitted
-	assert_signal_emitted(self, "test_signal", "Signal should be emitted")
-	assert_signal_emitted_with_parameters(self, "test_signal", [42], 
-		"Signal should be emitted with correct parameter")
+	assert_signal_emitted(self, "test_signal")
+	assert_signal_emitted_with_parameters(self, "test_signal", [42])
 
 # Example 4: Testing with a mock object
 func test_with_mock():
@@ -78,9 +77,9 @@ func test_object_properties():
 	var sprite = Sprite2D.new()
 	add_child_autoqfree(sprite)
 	
-	assert_has(sprite, "modulate", "Sprite should have modulate property")
-	assert_has(sprite, "set_texture", "Sprite should have set_texture method")
-	assert_extends(sprite, Node2D, "Sprite should extend Node2D")
+	assert_true("modulate" in sprite, "Sprite should have modulate property")
+	assert_has_method(sprite, "set_texture", "Sprite should have set_texture method")
+	assert_is(sprite, Node2D, "Sprite should extend Node2D")
 
 # Example 9: Testing boolean conditions
 func test_boolean_conditions():
@@ -95,11 +94,11 @@ func test_comparisons():
 	var score = 100
 	var min_score = 50
 	var max_score = 150
-	
+
 	assert_gt(score, min_score, "Score should be greater than minimum")
 	assert_lt(score, max_score, "Score should be less than maximum")
-	assert_ge(score, 100, "Score should be greater than or equal to 100")
-	assert_le(score, 100, "Score should be less than or equal to 100")
+	assert_true(score >= 100, "Score should be greater than or equal to 100")
+	assert_true(score <= 100, "Score should be less than or equal to 100")
 
 # Example 11: Testing strings
 func test_string_operations():

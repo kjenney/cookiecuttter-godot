@@ -83,9 +83,9 @@ func test_on_player_selected_with_no_player():
 	assert_true(game_manager_instance.game_started, "Game should be started even if player not found")
 
 func test_game_manager_has_required_methods():
-	assert_has(game_manager_instance, "add_score", "GameManager should have add_score method")
-	assert_has(game_manager_instance, "show_player_select", "GameManager should have show_player_select method")
-	assert_has(game_manager_instance, "_on_player_selected", "GameManager should have _on_player_selected method")
+	assert_has_method(game_manager_instance, "add_score", "GameManager should have add_score method")
+	assert_has_method(game_manager_instance, "show_player_select", "GameManager should have show_player_select method")
+	assert_has_method(game_manager_instance, "_on_player_selected", "GameManager should have _on_player_selected method")
 
 func test_score_accumulation():
 	var scores = [5, 10, 15, 20, 25]
