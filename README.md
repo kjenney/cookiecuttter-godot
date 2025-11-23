@@ -32,6 +32,12 @@ Create a new project from this template:
 cookiecutter .
 ```
 
+You can also pass values directly without prompts:
+
+```bash
+cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_svg=/path/to/character.svg
+```
+
 You'll be prompted to enter:
 - **project_name**: Display name of your game (e.g., "My Awesome Game")
 - **project_slug**: Folder name for your project (e.g., "my_awesome_game")
@@ -40,6 +46,10 @@ You'll be prompted to enter:
 - **player_types**: Comma-separated list of player types available in-game (default: "blue,red,green")
   - Examples: "blue,red,green", "red,blue", "blue", "warrior,mage,rogue"
   - The in-game menu will dynamically show only these options
+- **custom_player_svg**: Path to a custom SVG file for the player character (optional)
+  - Leave empty to use the default player sprite
+  - Provide an absolute path to your own 128x128 SVG file
+  - Example: `/path/to/my-character.svg`
 
 ## Project Structure
 
@@ -58,6 +68,7 @@ your_project/
 │   ├── player_select.gd # Player selection menu logic
 │   └── game_manager.gd  # Score tracking and game state
 └── assets/              # Game assets (images, sounds, etc.)
+    └── player.svg       # Player character sprite (customizable via custom_player_svg)
 ```
 
 ## Getting Started
@@ -72,7 +83,7 @@ your_project/
 
 ## Customization Ideas
 
-- **Graphics**: Replace the icon.svg placeholder with custom sprites
+- **Custom Player**: Use the `custom_player_svg` option to provide your own player character SVG, or edit `assets/player.svg` after generation
 - **More Collectibles**: Add different types of collectibles with varying point values
 - **UI**: Add a score display on screen using a CanvasLayer
 - **Sound Effects**: Add audio when collecting objects
