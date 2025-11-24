@@ -7,6 +7,7 @@ A CookieCutter template for creating a simple 2D game in Godot 4 with a characte
 - **Player Selection**: Choose between different player types (Blue, Red, Green) at game start
 - **Player Character**: CharacterBody2D with WASD/Arrow key movement
 - **Collectible Objects**: Area2D objects that disappear when collected
+- **NPC with Speech Bubble**: Optional NPC that displays a speech bubble when the player approaches
 - **Score Tracking**: Basic game manager with score system
 - **Clean Structure**: Organized scenes and scripts folders
 - **Ready to Extend**: Simple foundation for building more complex games
@@ -38,7 +39,16 @@ You can also pass values directly without prompts:
 cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_svg=/path/to/character.svg
 ```
 
-You'll be prompted to enter:
+Or use a config file to provide all values:
+
+```bash
+cookiecutter . --no-input --config-file example.json
+```
+
+`example.json` is an example of using a file to pass values to cookiecutter.
+
+If you don't use a config file with `--no-input ` you will be prompted for the following inputs:
+
 - **project_name**: Display name of your game (e.g., "My Awesome Game")
 - **project_slug**: Folder name for your project (e.g., "my_awesome_game")
 - **author_name**: Your name
@@ -48,8 +58,15 @@ You'll be prompted to enter:
   - The in-game menu will dynamically show only these options
 - **custom_player_svg**: Path to a custom SVG file for the player character (optional)
   - Leave empty to use the default player sprite
-  - Provide an absolute path to your own 128x128 SVG file
-  - Example: `/path/to/my-character.svg`
+  - Supports absolute paths, relative paths, and `~` expansion
+  - Examples: `/path/to/character.svg`, `./assets/character.svg`, `~/images/character.svg`
+- **include_npc**: Include an NPC in the game (default: "yes")
+  - Set to "yes" to include an NPC that displays a speech bubble when approached
+  - Set to "no" to exclude the NPC
+- **custom_npc_svg**: Path to a custom SVG file for the NPC (optional)
+  - Leave empty to use the same SVG as the player
+  - Supports absolute paths, relative paths, and `~` expansion
+  - Examples: `/path/to/npc.svg`, `./assets/npc.svg`, `~/images/npc.svg`
 
 ## Project Structure
 
@@ -60,15 +77,18 @@ your_project/
 ├── scenes/               # Scene files (.tscn)
 │   ├── player.tscn      # Player character scene
 │   ├── collectible.tscn # Collectible object scene
+│   ├── npc.tscn         # NPC scene (if include_npc=yes)
 │   ├── player_select.tscn # Player selection menu
 │   └── main.tscn        # Main game scene
 ├── scripts/             # GDScript files (.gd)
 │   ├── player.gd        # Player movement logic
 │   ├── collectible.gd   # Collectible behavior
+│   ├── npc.gd           # NPC behavior (if include_npc=yes)
 │   ├── player_select.gd # Player selection menu logic
 │   └── game_manager.gd  # Score tracking and game state
 └── assets/              # Game assets (images, sounds, etc.)
-    └── player.svg       # Player character sprite (customizable via custom_player_svg)
+    ├── player.svg       # Player character sprite (customizable via custom_player_svg)
+    └── npc.svg          # NPC sprite (if include_npc=yes, customizable via custom_npc_svg)
 ```
 
 ## Getting Started
@@ -79,7 +99,8 @@ your_project/
 4. Click "Start Game" to begin
 5. Use WASD or Arrow keys to move the player
 6. Collect the golden objects to increase your score
-7. Check the console output to see your score
+7. Walk near the NPC to see a speech bubble appear
+8. Check the console output to see your score
 
 ## Customization Ideas
 
@@ -93,12 +114,22 @@ your_project/
 
 ## Testing
 
-The template includes unit tests in the `tests/` folder using a minimal GUT (Godot Unit Test) stub. To run tests with full functionality:
+The template includes unit tests in the `tests/` folder using [GUT (Godot Unit Test)](https://github.com/bitwes/Gut). To run tests:
 
 1. Install the GUT addon from Godot's AssetLib (search for "GUT") or from [GitHub](https://github.com/bitwes/Gut)
 2. Replace the `addons/gut/` folder with the full GUT addon
 3. Enable the plugin in Project Settings > Plugins
-4. Run tests via the GUT panel
+4. Configure test directories in the GUT panel:
+   - Click the **GUT** tab in the bottom panel
+   - Click the **settings gear icon** on the right
+   - Under **Directories**, add: `res://tests`
+   - Check **Include Subdirs** if desired
+5. Click **Run All** to run tests
+
+A `.gutconfig.json` file is included for command-line testing:
+```bash
+godot --headless -s addons/gut/gut_cmdln.gd
+```
 
 ## Controls
 

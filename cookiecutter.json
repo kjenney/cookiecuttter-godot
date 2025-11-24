@@ -4,5 +4,7 @@
   "author_name": "Your Name",
   "godot_version": "4.5",
   "player_types": "blue,red,green",
-  "custom_player_svg": ""
+  "custom_player_svg": "",
+  "include_npc": "yes",
+  "custom_npc_svg": ""
 }
