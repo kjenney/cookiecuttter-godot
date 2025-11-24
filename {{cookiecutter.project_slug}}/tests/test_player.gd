@@ -53,4 +53,4 @@ func test_player_velocity_initialization():
 	assert_eq(player_instance.velocity, Vector2.ZERO, "Player velocity should start at zero")
 
 func test_player_has_physics_process():
-	assert_has(player_instance, "_physics_process", "Player should have _physics_process method")
+	assert_has_method(player_instance, "_physics_process", "Player should have _physics_process method")

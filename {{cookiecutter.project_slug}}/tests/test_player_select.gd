@@ -90,8 +90,7 @@ func test_start_button_emits_signal():
 	player_select_instance._on_start_pressed()
 	
 	# Verify signal was emitted
-	assert_signal_emitted(player_select_instance, "player_selected", 
-		"player_selected signal should be emitted when start is pressed")
+	assert_signal_emitted(player_select_instance, "player_selected")
 
 func test_start_button_emits_correct_player_type():
 	add_child_autoqfree(player_select_instance)
@@ -105,8 +104,7 @@ func test_start_button_emits_correct_player_type():
 		player_select_instance._on_player_button_pressed(test_type)
 		player_select_instance._on_start_pressed()
 		
-		assert_signal_emitted_with_parameters(player_select_instance, "player_selected", 
-			[test_type], "Signal should emit with correct player type")
+		assert_signal_emitted_with_parameters(player_select_instance, "player_selected", [test_type])
 
 func test_menu_queues_for_deletion_on_start():
 	add_child_autoqfree(player_select_instance)
@@ -118,7 +116,7 @@ func test_menu_queues_for_deletion_on_start():
 		"PlayerSelect menu should be queued for deletion after start")
 
 func test_has_required_methods():
-	assert_has(player_select_instance, "_create_ui", "Should have _create_ui method")
-	assert_has(player_select_instance, "_update_selection", "Should have _update_selection method")
-	assert_has(player_select_instance, "_on_player_button_pressed", "Should have _on_player_button_pressed method")
-	assert_has(player_select_instance, "_on_start_pressed", "Should have _on_start_pressed method")
+	assert_has_method(player_select_instance, "_create_ui", "Should have _create_ui method")
+	assert_has_method(player_select_instance, "_update_selection", "Should have _update_selection method")
+	assert_has_method(player_select_instance, "_on_player_button_pressed", "Should have _on_player_button_pressed method")
+	assert_has_method(player_select_instance, "_on_start_pressed", "Should have _on_start_pressed method")
