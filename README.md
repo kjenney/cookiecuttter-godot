@@ -1,6 +1,6 @@
 # Godot 4 2D Builder
 
-A CookieCutter template for creating a 2D game in Godot 4. that uses CookieCutter configuration to guide how the game is built.
+A CookieCutter template for creating a 2D game in Godot 4 that uses CookieCutter configuration to guide how the game is built.
 
 ## Features
 
