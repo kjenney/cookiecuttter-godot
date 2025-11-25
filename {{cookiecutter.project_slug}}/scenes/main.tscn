@@ -1,9 +1,10 @@
-{% if cookiecutter.include_npc == "yes" %}[gd_scene load_steps=5 format=3 uid="uid://d0l7m4n6o3p5"]{% else %}[gd_scene load_steps=4 format=3 uid="uid://d0l7m4n6o3p5"]{% endif %}
+{% if cookiecutter.include_npc == "yes" %}[gd_scene load_steps=6 format=3 uid="uid://d0l7m4n6o3p5"]{% else %}[gd_scene load_steps=5 format=3 uid="uid://d0l7m4n6o3p5"]{% endif %}
 
 [ext_resource type="PackedScene" uid="uid://b8j5k2x4y1z3" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://c9k6l3y5z2a4" path="res://scenes/collectible.tscn" id="2_collectible"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_manager"]
 {% if cookiecutter.include_npc == "yes" %}[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="4_npc"]{% endif %}
+[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="5_ui"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_manager")
@@ -32,3 +33,5 @@ position = Vector2(900, 500)
 [node name="NPC" parent="." instance=ExtResource("4_npc")]
 position = Vector2(576, 150)
 {% endif %}
+[node name="UILayer" parent="." instance=ExtResource("5_ui")]
+process_mode = 1

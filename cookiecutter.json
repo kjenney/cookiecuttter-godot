@@ -6,5 +6,9 @@
   "player_types": "blue,red,green",
   "custom_player_svg": "",
   "include_npc": "yes",
-  "custom_npc_svg": ""
+  "custom_npc_svg": "",
+  "game_mode": "endless",
+  "time_limit": "60",
+  "target_score": "100",
+  "victory_sound": ""
 }

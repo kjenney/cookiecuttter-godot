@@ -1,9 +1,13 @@
 import os
 import shutil
+import wave
+import math
+import struct
 
 CUSTOM_PLAYER_SVG_PATH = "{{ cookiecutter.custom_player_svg }}"
 INCLUDE_NPC = "{{ cookiecutter.include_npc }}"
 CUSTOM_NPC_SVG_PATH = "{{ cookiecutter.custom_npc_svg }}"
+VICTORY_SOUND_PATH = "{{ cookiecutter.victory_sound }}"
 
 DEFAULT_PLAYER_SVG = """<svg height="128" width="128" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="108" height="108" fill="#478cbf" rx="20" ry="20" />
@@ -109,9 +113,61 @@ def setup_npc():
             print(f"Warning: Custom NPC SVG path not found: {CUSTOM_NPC_SVG_PATH}")
 
 
+def generate_victory_sound(output_path, duration=0.6, sample_rate=44100):
+    """
+    Generate a simple victory sound (three ascending notes: C, E, G)
+    """
+    # Notes: C5 (523 Hz), E5 (659 Hz), G5 (784 Hz)
+    notes = [523, 659, 784]
+    note_duration = duration / len(notes)
+    samples_per_note = int(sample_rate * note_duration)
+
+    # Open WAV file
+    with wave.open(output_path, 'w') as wav_file:
+        # Set parameters: 1 channel (mono), 2 bytes per sample (16-bit), sample_rate
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+
+        # Generate each note
+        for freq in notes:
+            for i in range(samples_per_note):
+                # Generate sine wave with envelope (fade in/out)
+                t = i / sample_rate
+                envelope = min(i / (samples_per_note * 0.1),
+                             (samples_per_note - i) / (samples_per_note * 0.2))
+                envelope = min(envelope, 1.0)
+
+                # Generate sine wave sample
+                sample = int(32767 * 0.3 * envelope * math.sin(2 * math.pi * freq * t))
+                # Pack as signed 16-bit integer
+                wav_file.writeframes(struct.pack('<h', sample))
+
+    print(f"Generated victory sound: {output_path}")
+
+
+def setup_victory_sound():
+    """
+    Setup victory sound - use custom if provided, otherwise generate default
+    """
+    victory_sound_dest = os.path.join("assets", "victory.wav")
+    resolved_path = resolve_path(VICTORY_SOUND_PATH)
+
+    if resolved_path and os.path.isfile(resolved_path):
+        shutil.copy(resolved_path, victory_sound_dest)
+        print(f"Copied custom victory sound from: {resolved_path}")
+    else:
+        # Generate default victory sound
+        generate_victory_sound(victory_sound_dest)
+        if VICTORY_SOUND_PATH:
+            print(f"Warning: Custom victory sound path not found: {VICTORY_SOUND_PATH}")
+            print("Using generated victory sound instead.")
+
+
 def main():
     setup_player_svg()
     setup_npc()
+    setup_victory_sound()
 
 
 if __name__ == "__main__":
