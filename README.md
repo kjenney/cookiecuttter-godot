@@ -58,13 +58,17 @@ cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_
 
 ### Option 3: Config File (Recommended for complex setups)
 
-Use a JSON config file to provide all values at once:
+Use a JSON config file to specify only the values you want to customize:
 
 ```bash
 cookiecutter . --no-input --config-file example_config.json
 ```
 
-**Important:** Cookiecutter config files must use the `default_context` wrapper. The `levels_config` parameter inside the config can reference a SEPARATE JSON file for level definitions.
+**Important Notes:**
+- Cookiecutter config files must use the `default_context` wrapper
+- You only need to specify parameters you want to change from their defaults (defined in `cookiecutter.json`)
+- Any omitted parameters will use their default values automatically
+- The `levels_config` parameter inside the config can reference a SEPARATE JSON file for level definitions
 
 Example `example_config.json`:
 ```json
@@ -88,13 +92,26 @@ Example `example_config.json`:
 }
 ```
 
+**Minimal Config Example** (only customize what you need):
+```json
+{
+  "default_context": {
+    "project_name": "My Game",
+    "project_slug": "my_game",
+    "level_count": "3",
+    "levels_config": "./example_levels.json"
+  }
+}
+```
+This minimal config will use defaults for all other parameters (include_npc="yes", game_mode="endless", player_types="blue,red,green", etc.)
+
 The repository includes:
-- `example_config.json` - Complete cookiecutter configuration with all base parameters
+- `example_config.json` - Complete example showing all available parameters
 - `example_levels.json` - Level definitions referenced by the `levels_config` parameter
 
 ### Configuration Parameters
 
-When using interactive mode or config files, you'll need to provide the following inputs:
+The following parameters are available. Default values (from `cookiecutter.json`) are shown in parentheses. You only need to specify values you want to override:
 
 - **project_name**: Display name of your game (e.g., "My Awesome Game")
 - **project_slug**: Folder name for your project (e.g., "my_awesome_game")
