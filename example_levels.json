@@ -35,6 +35,20 @@
       "collectibles": 8,
       "target_score": 80,
       "background_color": "#3a1a1a"
+    },
+    {
+      "name": "celebration",
+      "celebration_level": true,
+      "auto_win_delay": 5,
+      "npc": {
+        "enabled": true,
+        "type": "victory",
+        "message": "Congratulations! You've completed all levels!",
+        "svg": ""
+      },
+      "collectibles": 0,
+      "target_score": 0,
+      "background_color": "#de1fdc"
     }
   ]
 }

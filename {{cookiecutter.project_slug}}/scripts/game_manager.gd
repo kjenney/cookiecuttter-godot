@@ -17,6 +17,9 @@ var ui_layer = null
 
 # Level configuration (if using multi-level mode)
 var level_config = null
+var is_celebration_level = false
+var celebration_timer = 0.0
+var auto_win_delay = 5.0
 
 func _ready():
 	print("Game Manager ready!")
@@ -27,6 +30,12 @@ func _ready():
 		level_config = level_mgr.get_current_level_config()
 
 		if level_config:
+			# Check if this is a celebration level
+			is_celebration_level = level_config.get("celebration_level", false)
+			if is_celebration_level:
+				auto_win_delay = level_config.get("auto_win_delay", 5.0)
+				print("Celebration level detected! Auto-win in ", auto_win_delay, " seconds")
+
 			# Override target score with level-specific value
 			target_score = level_config.get("target_score", target_score)
 			print("Using level config - target score: ", target_score)
@@ -99,6 +108,13 @@ func _process(delta):
 	if not game_started or game_over:
 		return
 
+	# Handle celebration level - auto-win after delay
+	if is_celebration_level:
+		celebration_timer += delta
+		if celebration_timer >= auto_win_delay:
+			end_game(true, "Congratulations! You've beaten the game!")
+		return
+
 	# Handle timed mode
 	if game_mode == "timed":
 		time_remaining -= delta
@@ -121,6 +137,19 @@ func add_score(points):
 
 func update_ui():
 	if not ui_layer:
+		return
+
+	# Hide score/target UI on celebration levels
+	if is_celebration_level:
+		var score_label = ui_layer.get_node_or_null("ScoreLabel")
+		if score_label:
+			score_label.visible = false
+		var target_label = ui_layer.get_node_or_null("TargetLabel")
+		if target_label:
+			target_label.visible = false
+		var timer_label = ui_layer.get_node_or_null("TimerLabel")
+		if timer_label:
+			timer_label.visible = false
 		return
 
 	# Update score label

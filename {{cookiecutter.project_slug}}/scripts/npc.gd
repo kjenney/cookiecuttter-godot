@@ -1,5 +1,7 @@
 extends Area2D
 
+@export var npc_message: String = "Hello!"
+
 @onready var speech_bubble = $SpeechBubble
 @onready var speech_label = $SpeechBubble/Label
 
@@ -7,6 +9,13 @@ var player_nearby = false
 
 func _ready():
 	print("[NPC] _ready called")
+	print("[NPC] NPC message: '", npc_message, "'")
+
+	# Set the label text from the exported variable
+	if speech_label:
+		speech_label.text = npc_message
+		print("[NPC] Speech label text set to: '", speech_label.text, "'")
+
 	if speech_bubble:
 		speech_bubble.visible = false
 		print("[NPC] Speech bubble initialized (hidden)")
@@ -46,8 +55,8 @@ func show_speech_bubble():
 	else:
 		push_warning("[NPC] Cannot show speech bubble - node not found!")
 	if speech_label:
-		speech_label.text = "Hi, how are you?"
-		print("[NPC] Speech text set")
+		# Text is already set in the scene file, just log it
+		print("[NPC] Speech text: ", speech_label.text)
 
 func hide_speech_bubble():
 	if speech_bubble:

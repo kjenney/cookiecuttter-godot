@@ -323,12 +323,10 @@ position = Vector2({x}, {y})
     if has_npc:
         scene_content += '''[node name="NPC" parent="." instance=ExtResource("4_npc")]
 position = Vector2(576, 150)
+npc_message = "''' + npc_message + '''"
 
 [node name="Sprite2D" parent="NPC"]
 texture = ExtResource("5_npc_texture")
-
-[node name="SpeechBubble/Label" parent="NPC"]
-text = "''' + npc_message + '''"
 
 '''
 

@@ -356,6 +356,20 @@ For full control, create a JSON file defining each level's properties. The templ
       "collectibles": 8,
       "target_score": 80,
       "background_color": "#3a1a1a"
+    },
+    {
+      "name": "celebration",
+      "celebration_level": true,
+      "auto_win_delay": 5,
+      "npc": {
+        "enabled": true,
+        "type": "victory",
+        "message": "Congratulations! You've completed all levels!",
+        "svg": ""
+      },
+      "collectibles": 0,
+      "target_score": 0,
+      "background_color": "#1a3a1a"
     }
   ]
 }
@@ -365,10 +379,19 @@ For full control, create a JSON file defining each level's properties. The templ
 
 Each level in the JSON array can have the following properties:
 
-- **name** (required): Scene filename (e.g., "level_1", "tutorial_stage", "boss_fight")
+- **name** (required): Scene filename (e.g., "level_1", "tutorial_stage", "boss_fight", "celebration")
 - **collectibles** (required): Number of collectible items to spawn
-- **target_score** (required): Score needed to complete this level
+- **target_score** (required): Score needed to complete this level (set to 0 for celebration levels)
 - **background_color** (required): Hex color for the level background (e.g., "#1a1a1a")
+- **celebration_level** (optional): Set to `true` to create a celebration level (default: `false`)
+  - Celebration levels automatically win after a delay - no score needed
+  - Perfect for victory screens after completing all challenging levels
+  - Hides score/target UI elements
+  - See `auto_win_delay` below
+- **auto_win_delay** (optional): Seconds to wait before auto-winning on celebration levels (default: 5)
+  - Only used when `celebration_level: true`
+  - Victory sound plays automatically after this delay
+  - Example: `"auto_win_delay": 5` waits 5 seconds then shows victory
 - **npc** (optional): NPC configuration for this level
   - **enabled**: `true` to include an NPC in this level, `false` to exclude
   - **type**: Descriptive type name for documentation purposes (e.g., "guide", "warrior", "boss")
