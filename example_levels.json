@@ -6,7 +6,7 @@
         "enabled": true,
         "type": "guide",
         "message": "Welcome to Level 1! Collect 40 points to advance.",
-        "svg": "./assets/svgs/damsel.svg"
+        "svg": ""
       },
       "collectibles": 4,
       "target_score": 40,

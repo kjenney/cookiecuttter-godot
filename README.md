@@ -115,9 +115,12 @@ When using interactive mode or config files, you'll need to provide the followin
   - Set to "yes" to include an NPC that displays a speech bubble when approached
   - Set to "no" to exclude the NPC
 - **custom_npc_svg**: Path to a custom SVG file for the NPC (optional)
-  - Leave empty to use the same SVG as the player
+  - **SINGLE-LEVEL MODE ONLY** (when `level_count: "1"`)
+  - This sets a global NPC sprite used in the single main scene
+  - Leave empty to use the default NPC sprite
   - Supports absolute paths, relative paths, and `~` expansion
   - Examples: `/path/to/npc.svg`, `./assets/npc.svg`, `~/images/npc.svg`
+  - **For multi-level games**: Ignore this parameter and specify NPC SVGs per-level in your `levels_config` JSON file instead (see "Multi-Level Configuration" below)
 - **game_mode**: Game mode to use (default: "endless")
   - Options: "endless", "timed", "score_target"
   - **endless**: Play indefinitely with a target score to reach
@@ -351,9 +354,14 @@ Each level in the JSON array can have the following properties:
 - **background_color** (required): Hex color for the level background (e.g., "#1a1a1a")
 - **npc** (optional): NPC configuration for this level
   - **enabled**: `true` to include an NPC in this level, `false` to exclude
-  - **type**: Descriptive type name (used for SVG filename: `{level_name}_npc.svg`)
-  - **message**: Text displayed when player approaches the NPC
-  - **svg**: Path to custom SVG for this level's NPC (leave empty for default)
+  - **type**: Descriptive type name for documentation purposes (e.g., "guide", "warrior", "boss")
+  - **message**: Text displayed in the speech bubble when player approaches the NPC
+  - **svg**: Path to a custom SVG file for **this specific level's NPC**
+    - Supports absolute paths, relative paths, and `~` expansion
+    - Examples: `"./assets/svgs/damsel.svg"`, `"~/images/boss.svg"`, `"/path/to/npc.svg"`
+    - Leave as empty string `""` to use a default NPC sprite
+    - Each level can have its own unique NPC appearance
+    - **This is independent of** the `custom_npc_svg` parameter (which only applies to single-level games)
 
 ### Multi-Level Game Flow
 
@@ -371,6 +379,51 @@ Each level in the JSON array can have the following properties:
 - **Unique NPCs**: Each level can have its own NPC with a custom message and appearance
 - **Progressive Difficulty**: Design levels to gradually increase in challenge (more collectibles, higher scores, etc.)
 - **Extensible Format**: The JSON format allows adding custom properties for future features
+
+### NPC Configuration Quick Reference
+
+Understanding when to use `custom_npc_svg` vs. level-specific NPC SVGs:
+
+**Single-Level Games** (`level_count: "1"`):
+- Use the `custom_npc_svg` parameter in your cookiecutter config
+- This sets a global NPC sprite for the single main scene
+- Example:
+  ```json
+  {
+    "default_context": {
+      "level_count": "1",
+      "custom_npc_svg": "./my_npc.svg"
+    }
+  }
+  ```
+
+**Multi-Level Games** (`level_count: "2"` or higher):
+- Ignore the `custom_npc_svg` parameter entirely
+- Instead, specify NPC SVGs per-level in your `levels_config` JSON file
+- Each level can have a different NPC sprite
+- Example in `example_levels.json`:
+  ```json
+  {
+    "levels": [
+      {
+        "name": "level_1",
+        "npc": {
+          "enabled": true,
+          "message": "Welcome!",
+          "svg": "./assets/svgs/friendly_npc.svg"
+        }
+      },
+      {
+        "name": "level_2",
+        "npc": {
+          "enabled": true,
+          "message": "Tougher challenge!",
+          "svg": "./assets/svgs/warrior_npc.svg"
+        }
+      }
+    ]
+  }
+  ```
 
 ## Customization Ideas
 
