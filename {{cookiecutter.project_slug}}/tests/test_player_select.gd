@@ -69,15 +69,17 @@ func test_player_button_selection():
 
 func test_selection_marker_update():
 	player_select_instance._ready()
-	
+
 	if player_select_instance.available_types.size() > 0:
 		var first_type = player_select_instance.available_types[0]
 		player_select_instance._on_player_button_pressed(first_type)
 		player_select_instance._update_selection()
-		
+
 		var button = player_select_instance.buttons[first_type]
-		assert_string_contains(button.text, "[SELECTED]", 
-			"Selected button should show [SELECTED] marker")
+		assert_string_contains(button.text, "→",
+			"Selected button should show arrow markers")
+		assert_gt(button.modulate.r, 1.0,
+			"Selected button should be brighter")
 
 func test_start_button_emits_signal():
 	add_child_autoqfree(player_select_instance)
@@ -120,3 +122,81 @@ func test_has_required_methods():
 	assert_has_method(player_select_instance, "_update_selection", "Should have _update_selection method")
 	assert_has_method(player_select_instance, "_on_player_button_pressed", "Should have _on_player_button_pressed method")
 	assert_has_method(player_select_instance, "_on_start_pressed", "Should have _on_start_pressed method")
+	assert_has_method(player_select_instance, "_navigate_next", "Should have _navigate_next method")
+	assert_has_method(player_select_instance, "_navigate_previous", "Should have _navigate_previous method")
+
+# ===== Arrow Key Navigation Tests =====
+
+func test_navigate_next():
+	player_select_instance._ready()
+
+	if player_select_instance.available_types.size() > 1:
+		var first_type = player_select_instance.available_types[0]
+		var second_type = player_select_instance.available_types[1]
+
+		assert_eq(player_select_instance.selected_player, first_type, "Should start with first type")
+
+		player_select_instance._navigate_next()
+
+		assert_eq(player_select_instance.selected_player, second_type, "Should move to second type")
+		assert_eq(player_select_instance.selected_index, 1, "Selected index should be 1")
+
+func test_navigate_previous():
+	player_select_instance._ready()
+
+	if player_select_instance.available_types.size() > 1:
+		var first_type = player_select_instance.available_types[0]
+		var last_type = player_select_instance.available_types[player_select_instance.available_types.size() - 1]
+
+		# Start at first, go previous should wrap to last
+		player_select_instance._navigate_previous()
+
+		assert_eq(player_select_instance.selected_player, last_type, "Should wrap to last type")
+		assert_eq(player_select_instance.selected_index, player_select_instance.available_types.size() - 1,
+			"Selected index should be last index")
+
+func test_navigate_wraps_around():
+	player_select_instance._ready()
+
+	if player_select_instance.available_types.size() > 1:
+		var first_type = player_select_instance.available_types[0]
+		var last_index = player_select_instance.available_types.size() - 1
+
+		# Navigate to last
+		for i in range(last_index + 1):
+			player_select_instance._navigate_next()
+
+		# Should wrap back to first
+		assert_eq(player_select_instance.selected_player, first_type, "Should wrap around to first type")
+		assert_eq(player_select_instance.selected_index, 0, "Index should wrap to 0")
+
+func test_selected_index_syncs_with_button_press():
+	player_select_instance._ready()
+
+	if player_select_instance.available_types.size() > 1:
+		var second_type = player_select_instance.available_types[1]
+
+		player_select_instance._on_player_button_pressed(second_type)
+
+		assert_eq(player_select_instance.selected_index, 1, "Selected index should update when button is pressed")
+		assert_eq(player_select_instance.selected_player, second_type, "Selected player should match")
+
+func test_navigate_updates_visual_selection():
+	player_select_instance._ready()
+
+	if player_select_instance.available_types.size() > 1:
+		var first_type = player_select_instance.available_types[0]
+		var second_type = player_select_instance.available_types[1]
+
+		# Navigate to next
+		player_select_instance._navigate_next()
+
+		# Check first button is not highlighted
+		var first_button = player_select_instance.buttons[first_type]
+		assert_false("→" in first_button.text, "First button should not have arrows")
+		assert_eq(first_button.modulate.r, 1.0, "First button should have normal brightness")
+
+		# Check second button is highlighted
+		var second_button = player_select_instance.buttons[second_type]
+		assert_true("→" in second_button.text, "Second button should have arrows")
+		assert_gt(second_button.modulate.r, 1.0, "Second button should be brighter")

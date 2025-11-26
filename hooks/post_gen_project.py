@@ -4,7 +4,8 @@ import wave
 import math
 import struct
 
-CUSTOM_PLAYER_SVG_PATH = "{{ cookiecutter.custom_player_svg }}"
+CUSTOM_PLAYER_SVGS = "{{ cookiecutter.custom_player_svgs }}"
+PLAYER_TYPES = "{{ cookiecutter.player_types }}"
 INCLUDE_NPC = "{{ cookiecutter.include_npc }}"
 CUSTOM_NPC_SVG_PATH = "{{ cookiecutter.custom_npc_svg }}"
 VICTORY_SOUND_PATH = "{{ cookiecutter.victory_sound }}"
@@ -59,21 +60,63 @@ def resolve_path(path):
     return os.path.abspath(parent_relative)
 
 
-def setup_player_svg():
-    player_svg_dest = os.path.join("assets", "player.svg")
-    resolved_path = resolve_path(CUSTOM_PLAYER_SVG_PATH)
+def parse_player_svgs():
+    """
+    Parse the custom_player_svgs string into a dictionary.
+    Format: "blue:/path/to/blue.svg,red:/path/to/red.svg,green:/path/to/green.svg"
+    Returns: dict like {"blue": "/path/to/blue.svg", "red": "/path/to/red.svg"}
+    """
+    if not CUSTOM_PLAYER_SVGS:
+        return {}
 
-    if resolved_path and os.path.isfile(resolved_path):
-        shutil.copy(resolved_path, player_svg_dest)
-        print(f"Copied custom player SVG from: {resolved_path}")
+    player_svgs = {}
+    for pair in CUSTOM_PLAYER_SVGS.split(","):
+        pair = pair.strip()
+        if ":" in pair:
+            player_type, path = pair.split(":", 1)
+            player_svgs[player_type.strip()] = path.strip()
+
+    return player_svgs
+
+
+def setup_player_svg():
+    """
+    Setup player SVG(s). Supports:
+    1. custom_player_svgs - specific SVG for each player type
+    2. Default SVG (if no custom_player_svgs provided)
+    """
+    player_types = [t.strip() for t in PLAYER_TYPES.split(",")]
+    custom_svgs = parse_player_svgs()
+
+    # Check if we have type-specific SVGs
+    if custom_svgs:
+        print("Using type-specific player SVGs...")
+        for player_type in player_types:
+            dest_path = os.path.join("assets", f"player_{player_type}.svg")
+
+            if player_type in custom_svgs:
+                resolved_path = resolve_path(custom_svgs[player_type])
+                if resolved_path and os.path.isfile(resolved_path):
+                    shutil.copy(resolved_path, dest_path)
+                    print(f"  {player_type}: Copied from {resolved_path}")
+                else:
+                    # Use default if custom not found
+                    with open(dest_path, "w") as f:
+                        f.write(DEFAULT_PLAYER_SVG)
+                    print(f"  {player_type}: Warning - path not found, using default")
+            else:
+                # No custom SVG specified for this type, use default
+                with open(dest_path, "w") as f:
+                    f.write(DEFAULT_PLAYER_SVG)
+                print(f"  {player_type}: Using default SVG")
     else:
-        with open(player_svg_dest, "w") as f:
-            f.write(DEFAULT_PLAYER_SVG)
-        if CUSTOM_PLAYER_SVG_PATH:
-            print(f"Warning: Custom player SVG path not found: {CUSTOM_PLAYER_SVG_PATH}")
-            print("Using default player SVG instead.")
-        else:
-            print("Using default player SVG.")
+        # Use default for all types
+        print("Using default player SVG for all types...")
+        for player_type in player_types:
+            dest_path = os.path.join("assets", f"player_{player_type}.svg")
+            with open(dest_path, "w") as f:
+                f.write(DEFAULT_PLAYER_SVG)
+            print(f"  {player_type}: Created default SVG")
 
 
 def setup_npc():

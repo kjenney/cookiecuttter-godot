@@ -1,11 +1,10 @@
 .venv
 
-indiana.svg
-damsel.svg
+assets/svgs
+assets/sounds
 
 damsel
 my_godot_game
 
 mine.json
 
-victory.wav

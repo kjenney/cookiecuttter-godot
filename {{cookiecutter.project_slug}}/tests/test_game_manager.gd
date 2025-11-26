@@ -424,7 +424,7 @@ func test_end_game_includes_restart_instruction():
 
 	game_manager_instance.end_game(false, "Time's up!")
 
-	assert_true("Press SPACE to restart" in end_label.text, "End game message should include restart instruction")
+	assert_true("Press any key to restart" in end_label.text, "End game message should include restart instruction")
 	assert_true("Time's up!" in end_label.text, "End game message should include original message")
 
 func test_victory_sound_plays_on_win():

@@ -116,7 +116,7 @@ func end_game(won: bool, message: String):
 	if ui_layer:
 		var end_label = ui_layer.get_node_or_null("EndGameLabel")
 		if end_label:
-			end_label.text = message + "\n\nPress SPACE to restart"
+			end_label.text = message + "\n\nPress any key to restart"
 			end_label.visible = true
 
 		# Play victory sound if won
@@ -126,8 +126,13 @@ func end_game(won: bool, message: String):
 				victory_sound.play()
 
 func _input(event):
-	# Handle restart when game is over
-	if game_over and event.is_action_pressed("ui_select"):
+	# Handle restart when game is over - accept SPACE, ENTER, or arrow keys
+	if game_over and (event.is_action_pressed("ui_select") or
+	                   event.is_action_pressed("ui_accept") or
+	                   event.is_action_pressed("ui_up") or
+	                   event.is_action_pressed("ui_down") or
+	                   event.is_action_pressed("ui_left") or
+	                   event.is_action_pressed("ui_right")):
 		restart_game()
 
 func restart_game():

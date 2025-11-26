@@ -14,7 +14,7 @@ A CookieCutter template for creating a 2D game in Godot 4 that uses CookieCutter
   - **Timed Mode**: Race against time to reach the target score before time runs out
   - **Score Target Mode**: Focus purely on reaching the target score (same as endless but with clearer intent)
 - **Victory Feedback**: Auto-generated victory sound plays when winning (customizable)
-- **Quick Restart**: Press SPACE to instantly restart the game after game over
+- **Quick Restart**: Press any key (SPACE, ENTER, arrows) to instantly restart after game over
 - **Clean Structure**: Organized scenes and scripts folders
 - **Ready to Extend**: Simple foundation for building more complex games
 
@@ -42,7 +42,7 @@ cookiecutter .
 You can also pass values directly without prompts:
 
 ```bash
-cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_svg=/path/to/character.svg
+cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_svgs="warrior:/path/to/warrior.svg,mage:/path/to/mage.svg"
 ```
 
 Or use a config file to provide all values:
@@ -62,10 +62,14 @@ If you don't use a config file with `--no-input ` you will be prompted for the f
 - **player_types**: Comma-separated list of player types available in-game (default: "blue,red,green")
   - Examples: "blue,red,green", "red,blue", "blue", "warrior,mage,rogue"
   - The in-game menu will dynamically show only these options
-- **custom_player_svg**: Path to a custom SVG file for the player character (optional)
-  - Leave empty to use the default player sprite
+- **custom_player_svgs**: Paths to type-specific SVG files for each player type (optional)
+  - Format: `"type1:path1,type2:path2,type3:path3"`
+  - Example: `"blue:~/blue_hero.svg,red:~/red_warrior.svg,green:~/green_mage.svg"`
+  - This allows completely different character designs for each player type
+  - Leave empty to use the default player sprite with color modulation
   - Supports absolute paths, relative paths, and `~` expansion
-  - Examples: `/path/to/character.svg`, `./assets/character.svg`, `~/images/character.svg`
+  - Types not specified will use the default SVG
+  - To use the same custom SVG for all types: `"blue:~/hero.svg,red:~/hero.svg,green:~/hero.svg"`
 - **include_npc**: Include an NPC in the game (default: "yes")
   - Set to "yes" to include an NPC that displays a speech bubble when approached
   - Set to "no" to exclude the NPC
@@ -110,7 +114,9 @@ your_project/
 │   ├── ui_layer.gd      # UI layer management
 │   └── game_manager.gd  # Score tracking, game state, and game mode logic
 └── assets/              # Game assets (images, sounds, etc.)
-    ├── player.svg       # Player character sprite (customizable via custom_player_svg)
+    ├── player_blue.svg  # Blue player sprite (customizable via custom_player_svgs)
+    ├── player_red.svg   # Red player sprite (customizable via custom_player_svgs)
+    ├── player_green.svg # Green player sprite (customizable via custom_player_svgs)
     ├── npc.svg          # NPC sprite (if include_npc=yes, customizable via custom_npc_svg)
     └── victory.wav      # Victory sound (auto-generated or customizable via victory_sound)
 ```
@@ -119,12 +125,14 @@ your_project/
 
 1. Open the generated project in Godot 4
 2. Press F5 or click the Play button to run the game
-3. Select your preferred player type (Blue, Red, or Green)
-4. Click "Start Game" to begin
-5. Use WASD or Arrow keys to move the player
-6. Collect the golden objects to increase your score
-7. Walk near the NPC to see a speech bubble appear (if enabled)
-8. Watch the on-screen UI for your score and game mode information
+3. **Player Selection Screen**:
+   - Use **arrow keys** or **click** to choose your player type
+   - Press **ENTER** or **SPACE** (or click "Start Game") to begin
+   - Selected option is highlighted with arrows (→ Player ←) and brighter color
+4. Use WASD or Arrow keys to move the player
+5. Collect the golden objects to increase your score
+6. Walk near the NPC to see a speech bubble appear (if enabled)
+7. Watch the on-screen UI for your score and game mode information
 
 ### Game Mode Behaviors
 
@@ -139,11 +147,11 @@ your_project/
 **Winning (reaching target score in any mode):**
 1. Victory sound plays (pleasant 3-note chime)
 2. Game pauses and displays "You win! Target score reached!"
-3. Press **SPACE** to restart and play again
+3. Press **any key** (SPACE, ENTER, or arrow keys) to restart and play again
 
 **Losing (timed mode only - time runs out):**
 1. Game pauses and displays "Time's up! Final score: X"
-2. Press **SPACE** to restart and try again
+2. Press **any key** (SPACE, ENTER, or arrow keys) to restart and try again
 
 ## Example Configurations
 
@@ -154,7 +162,7 @@ cookiecutter . project_name="Speed Runner" game_mode=timed time_limit=30 include
 
 Create a score-based game with custom player:
 ```bash
-cookiecutter . project_name="Gem Collector" game_mode=score_target target_score=200 custom_player_svg=~/my_character.svg
+cookiecutter . project_name="Gem Collector" game_mode=score_target target_score=200 custom_player_svgs="blue:~/my_character.svg,red:~/my_character.svg,green:~/my_character.svg"
 ```
 
 Create a game with a custom victory sound:
@@ -162,9 +170,15 @@ Create a game with a custom victory sound:
 cookiecutter . project_name="My Game" game_mode=score_target target_score=50 victory_sound=./sounds/victory.wav
 ```
 
+Create a game with unique character designs for each player type:
+```bash
+cookiecutter . project_name="RPG Adventure" player_types="warrior,mage,rogue" custom_player_svgs="warrior:~/warrior.svg,mage:~/mage.svg,rogue:~/rogue.svg"
+```
+
 ## Customization Ideas
 
-- **Custom Player**: Use the `custom_player_svg` option to provide your own player character SVG, or edit `assets/player.svg` after generation
+- **Custom Player**: Use `custom_player_svgs` to provide unique character designs for each player type (warrior, mage, rogue, etc.), or use the same SVG for all types
+- **Unique Character Classes**: Create visually distinct characters for each player type - e.g., a knight for "warrior", wizard for "mage", archer for "rogue"
 - **Game Modes**: Mix and match game modes with different time limits and target scores for varied gameplay
 - **More Collectibles**: Add different types of collectibles with varying point values
 - **Sound Effects**: Add audio when collecting objects or when the timer is running low
@@ -193,7 +207,16 @@ godot --headless -s addons/gut/gut_cmdln.gd
 
 ## Controls
 
+### Player Selection
+- **Arrow Keys** (←/→ or ↑/↓): Navigate between player options
+- **ENTER** or **SPACE**: Start the game with selected player
+- **Mouse Click**: Click buttons to select or start
+
+### Gameplay
 - **Arrow Keys** or **WASD**: Move the player character
+
+### Game Over
+- **Any Key** (SPACE, ENTER, or arrows): Restart the game
 
 ## License
 

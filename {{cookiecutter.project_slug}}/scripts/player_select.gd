@@ -5,6 +5,7 @@ signal player_selected(player_type: String)
 # Available player types from cookiecutter configuration
 var available_types = "{{ cookiecutter.player_types }}".split(",")
 var selected_player = available_types[0] if available_types.size() > 0 else "blue"
+var selected_index = 0
 
 var buttons = {}
 
@@ -49,14 +50,20 @@ func _create_ui():
 func _on_player_button_pressed(player_type: String):
 	print(player_type.capitalize(), " button pressed!")
 	selected_player = player_type
+	selected_index = available_types.find(player_type)
 	_update_selection()
 
 func _update_selection():
-	# Update button text to show selection with [SELECTED] marker
+	# Update button text and appearance to show selection
 	for player_type in available_types:
 		if player_type in buttons:
-			var marker = " [SELECTED]" if selected_player == player_type else ""
-			buttons[player_type].text = player_type.capitalize() + " Player" + marker
+			var button = buttons[player_type]
+			if selected_player == player_type:
+				button.text = "→ " + player_type.capitalize() + " Player ←"
+				button.modulate = Color(1.5, 1.5, 1.5)  # Brighter
+			else:
+				button.text = player_type.capitalize() + " Player"
+				button.modulate = Color(1.0, 1.0, 1.0)  # Normal
 	print("Selection updated to: ", selected_player)
 
 func _on_start_pressed():
@@ -64,3 +71,29 @@ func _on_start_pressed():
 	player_selected.emit(selected_player)
 	print("Signal emitted, removing menu...")
 	queue_free()
+
+func _input(event):
+	# Handle arrow key navigation
+	if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
+		_navigate_previous()
+	elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
+		_navigate_next()
+	elif event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
+		# ENTER or SPACE starts the game
+		_on_start_pressed()
+
+func _navigate_previous():
+	selected_index -= 1
+	if selected_index < 0:
+		selected_index = available_types.size() - 1
+	selected_player = available_types[selected_index]
+	_update_selection()
+	print("Navigated to: ", selected_player)
+
+func _navigate_next():
+	selected_index += 1
+	if selected_index >= available_types.size():
+		selected_index = 0
+	selected_player = available_types[selected_index]
+	_update_selection()
+	print("Navigated to: ", selected_player)

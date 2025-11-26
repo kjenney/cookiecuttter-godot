@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="5_ui"]
 
 [node name="Main" type="Node2D"]
+process_mode = 3
 script = ExtResource("3_manager")
 
 [node name="Background" type="ColorRect" parent="."]
