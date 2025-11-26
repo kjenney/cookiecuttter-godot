@@ -3,12 +3,15 @@ import shutil
 import wave
 import math
 import struct
+import json
 
 CUSTOM_PLAYER_SVGS = "{{ cookiecutter.custom_player_svgs }}"
 PLAYER_TYPES = "{{ cookiecutter.player_types }}"
 INCLUDE_NPC = "{{ cookiecutter.include_npc }}"
 CUSTOM_NPC_SVG_PATH = "{{ cookiecutter.custom_npc_svg }}"
 VICTORY_SOUND_PATH = "{{ cookiecutter.victory_sound }}"
+LEVEL_COUNT = int("{{ cookiecutter.level_count }}")
+LEVELS_CONFIG_PATH = "{{ cookiecutter.levels_config }}"
 
 DEFAULT_PLAYER_SVG = """<svg height="128" width="128" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="108" height="108" fill="#478cbf" rx="20" ry="20" />
@@ -207,10 +210,194 @@ def setup_victory_sound():
             print("Using generated victory sound instead.")
 
 
+def load_levels_config():
+    """
+    Load levels configuration from JSON file or create default config
+    """
+    if LEVELS_CONFIG_PATH:
+        resolved_path = resolve_path(LEVELS_CONFIG_PATH)
+        if resolved_path and os.path.isfile(resolved_path):
+            with open(resolved_path, 'r') as f:
+                config = json.load(f)
+                print(f"Loaded levels configuration from: {resolved_path}")
+                return config['levels']
+        else:
+            print(f"Warning: Levels config not found: {LEVELS_CONFIG_PATH}")
+
+    # Generate default levels configuration
+    print(f"Generating default configuration for {LEVEL_COUNT} level(s)...")
+    levels = []
+    for i in range(LEVEL_COUNT):
+        level_num = i + 1
+        levels.append({
+            "name": f"level_{level_num}",
+            "npc": {
+                "enabled": INCLUDE_NPC.lower() == "yes",
+                "type": f"npc_{level_num}",
+                "message": f"Welcome to Level {level_num}!",
+                "svg": ""
+            },
+            "collectibles": 4 + (i * 2),  # Increase collectibles each level
+            "target_score": 40 + (i * 20),  # Increase target each level
+            "background_color": "#1a1a1a"
+        })
+    return levels
+
+
+def generate_level_scene(level_config, level_index):
+    """
+    Generate a level scene file (.tscn) based on level configuration
+    """
+    level_name = level_config['name']
+    npc_config = level_config.get('npc', {})
+    collectibles_count = level_config.get('collectibles', 4)
+    bg_color = level_config.get('background_color', '#1a1a1a')
+
+    # Convert hex color to Godot Color format
+    def hex_to_godot_color(hex_color):
+        hex_color = hex_color.lstrip('#')
+        r = int(hex_color[0:2], 16) / 255.0
+        g = int(hex_color[2:4], 16) / 255.0
+        b = int(hex_color[4:6], 16) / 255.0
+        return f"Color({r:.3f}, {g:.3f}, {b:.3f}, 1)"
+
+    godot_color = hex_to_godot_color(bg_color)
+    has_npc = npc_config.get('enabled', False)
+    npc_message = npc_config.get('message', 'Hi, how are you?')
+
+    # Calculate load_steps - add 1 for level-specific NPC texture if NPC is enabled
+    load_steps = 6 if has_npc else 4
+
+    # Generate collectible positions in a grid pattern
+    collectible_positions = []
+    if collectibles_count > 0:
+        # Arrange collectibles in a rough grid
+        cols = min(collectibles_count, 4)
+        rows = (collectibles_count + cols - 1) // cols
+
+        for i in range(collectibles_count):
+            row = i // cols
+            col = i % cols
+            x = 200 + (col * 250)
+            y = 200 + (row * 150)
+            collectible_positions.append((x, y))
+
+    # Build the scene file content
+    scene_content = f'''[gd_scene load_steps={load_steps} format=3 uid="uid://level_{level_index}_uid"]
+
+[ext_resource type="PackedScene" uid="uid://b8j5k2x4y1z3" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://c9k6l3y5z2a4" path="res://scenes/collectible.tscn" id="2_collectible"]
+[ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_manager"]
+'''
+
+    if has_npc:
+        scene_content += '[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="4_npc"]\n'
+        scene_content += f'[ext_resource type="Texture2D" path="res://assets/{level_name}_npc.svg" id="5_npc_texture"]\n'
+        scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="6_ui"]\n\n'
+    else:
+        scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="5_ui"]\n\n'
+
+    scene_content += '''[node name="Main" type="Node2D"]
+process_mode = 3
+script = ExtResource("3_manager")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = ''' + godot_color + '''
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+process_mode = 1
+position = Vector2(576, 324)
+
+'''
+
+    # Add collectibles
+    for i, (x, y) in enumerate(collectible_positions, 1):
+        scene_content += f'''[node name="Collectible{i}" parent="." instance=ExtResource("2_collectible")]
+position = Vector2({x}, {y})
+
+'''
+
+    # Add NPC if enabled
+    if has_npc:
+        scene_content += '''[node name="NPC" parent="." instance=ExtResource("4_npc")]
+position = Vector2(576, 150)
+
+[node name="Sprite2D" parent="NPC"]
+texture = ExtResource("5_npc_texture")
+
+[node name="SpeechBubble/Label" parent="NPC"]
+text = "''' + npc_message + '''"
+
+'''
+
+    # Add UI layer - use correct ExtResource ID based on whether NPC is present
+    ui_resource_id = "6_ui" if has_npc else "5_ui"
+    scene_content += f'''[node name="UILayer" parent="." instance=ExtResource("{ui_resource_id}")]
+process_mode = 1
+'''
+
+    return scene_content
+
+
+def setup_levels(levels_config):
+    """
+    Setup level-specific assets (NPCs, etc.) based on configuration
+    """
+    print(f"Setting up {len(levels_config)} level(s)...")
+
+    for i, level in enumerate(levels_config):
+        level_name = level['name']
+        npc_config = level.get('npc', {})
+
+        # Setup NPC SVG if needed
+        if npc_config.get('enabled', False):
+            npc_type = npc_config.get('type', 'npc')
+            npc_svg_path = npc_config.get('svg', '')
+            dest_path = os.path.join("assets", f"{level_name}_npc.svg")
+
+            if npc_svg_path:
+                resolved_path = resolve_path(npc_svg_path)
+                if resolved_path and os.path.isfile(resolved_path):
+                    shutil.copy(resolved_path, dest_path)
+                    print(f"  {level_name}: Copied NPC SVG from {resolved_path}")
+                else:
+                    # Use default NPC SVG
+                    with open(dest_path, "w") as f:
+                        f.write(DEFAULT_NPC_SVG)
+                    print(f"  {level_name}: Using default NPC SVG")
+            else:
+                # Use default NPC SVG
+                with open(dest_path, "w") as f:
+                    f.write(DEFAULT_NPC_SVG)
+                print(f"  {level_name}: Created default NPC SVG")
+
+        # Generate level scene file
+        scene_content = generate_level_scene(level, i + 1)
+        scene_path = os.path.join("scenes", f"{level_name}.tscn")
+        with open(scene_path, 'w') as f:
+            f.write(scene_content)
+        print(f"  {level_name}: Created scene file {scene_path}")
+
+    # Write levels configuration to a file for the game to read
+    config_path = os.path.join("levels_config.json")
+    with open(config_path, 'w') as f:
+        json.dump({"levels": levels_config}, f, indent=2)
+    print(f"Wrote levels configuration to: {config_path}")
+
+
 def main():
     setup_player_svg()
     setup_npc()
     setup_victory_sound()
+
+    # Setup levels if count > 1
+    if LEVEL_COUNT > 1:
+        levels_config = load_levels_config()
+        setup_levels(levels_config)
+    else:
+        print("Single level mode - no level configuration needed")
 
 
 if __name__ == "__main__":

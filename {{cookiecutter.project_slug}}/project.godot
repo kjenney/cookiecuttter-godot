@@ -3,10 +3,14 @@ config_version=5
 [application]
 
 config/name="{{cookiecutter.project_name}}"
-run/main_scene="res://scenes/main.tscn"
+{% if cookiecutter.level_count|int > 1 %}run/main_scene="res://scenes/level_1.tscn"{% else %}run/main_scene="res://scenes/main.tscn"{% endif %}
 config/features=PackedStringArray("{{cookiecutter.godot_version}}", "Forward Plus")
 config/icon="res://icon.svg"
+{% if cookiecutter.level_count|int > 1 %}
+[autoload]
 
+LevelManager="*res://scripts/level_manager.gd"
+{% endif %}
 [display]
 
 window/size/viewport_width=1152

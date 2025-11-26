@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://d0l7m4n6o3p5"]
+
+[ext_resource type="PackedScene" uid="uid://b8j5k2x4y1z3" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://c9k6l3y5z2a4" path="res://scenes/collectible.tscn" id="2_collectible"]
+[ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_manager"]
+[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="4_npc"]
+[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="5_ui"]
+
+[node name="Main" type="Node2D"]
+process_mode = 3
+script = ExtResource("3_manager")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.1, 0.1, 0.1, 1)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+process_mode = 1
+position = Vector2(576, 324)
+
+[node name="Collectible1" parent="." instance=ExtResource("2_collectible")]
+position = Vector2(200, 200)
+
+[node name="Collectible2" parent="." instance=ExtResource("2_collectible")]
+position = Vector2(900, 200)
+
+[node name="Collectible3" parent="." instance=ExtResource("2_collectible")]
+position = Vector2(200, 500)
+
+[node name="Collectible4" parent="." instance=ExtResource("2_collectible")]
+position = Vector2(900, 500)
+
+[node name="NPC" parent="." instance=ExtResource("4_npc")]
+position = Vector2(576, 150)
+
+[node name="UILayer" parent="." instance=ExtResource("5_ui")]
+process_mode = 1

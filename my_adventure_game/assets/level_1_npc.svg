@@ -1,0 +1,52 @@
+<svg height="128" width="128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dress (pink/magenta) -->
+  <path d="M 44 55 L 34 120 L 94 120 L 84 55 Z" fill="#E91E8C"/>
+
+  <!-- Dress bodice -->
+  <rect x="48" y="50" width="32" height="20" fill="#C71585" rx="3" ry="3"/>
+
+  <!-- Dress details (lace trim) -->
+  <ellipse cx="64" cy="120" rx="32" ry="6" fill="#FF69B4"/>
+
+  <!-- Arms raised in distress -->
+  <rect x="24" y="35" width="12" height="30" fill="#FFDAB9" rx="4" ry="4" transform="rotate(-30 30 50)"/>
+  <rect x="92" y="35" width="12" height="30" fill="#FFDAB9" rx="4" ry="4" transform="rotate(30 98 50)"/>
+
+  <!-- Hands -->
+  <circle cx="22" cy="28" r="7" fill="#FFDAB9"/>
+  <circle cx="106" cy="28" r="7" fill="#FFDAB9"/>
+
+  <!-- Head -->
+  <circle cx="64" cy="32" r="20" fill="#FFDAB9"/>
+
+  <!-- Hair (long blonde) -->
+  <ellipse cx="64" cy="28" rx="22" ry="18" fill="#FFD700"/>
+  <ellipse cx="44" cy="45" rx="8" ry="20" fill="#FFD700"/>
+  <ellipse cx="84" cy="45" rx="8" ry="20" fill="#FFD700"/>
+
+  <!-- Face -->
+  <circle cx="64" cy="34" r="16" fill="#FFDAB9"/>
+
+  <!-- Worried eyes -->
+  <ellipse cx="58" cy="32" rx="3" ry="4" fill="white"/>
+  <ellipse cx="70" cy="32" rx="3" ry="4" fill="white"/>
+  <circle cx="58" cy="33" r="2" fill="#4169E1"/>
+  <circle cx="70" cy="33" r="2" fill="#4169E1"/>
+
+  <!-- Worried eyebrows -->
+  <path d="M 53 27 Q 58 25 62 28" stroke="#8B4513" stroke-width="2" fill="none"/>
+  <path d="M 75 27 Q 70 25 66 28" stroke="#8B4513" stroke-width="2" fill="none"/>
+
+  <!-- Open mouth (distressed) -->
+  <ellipse cx="64" cy="42" rx="4" ry="3" fill="#8B0000"/>
+
+  <!-- Crown/tiara -->
+  <path d="M 50 18 L 52 10 L 58 16 L 64 6 L 70 16 L 76 10 L 78 18 Z" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+
+  <!-- Crown jewel -->
+  <circle cx="64" cy="12" r="3" fill="#FF69B4"/>
+
+  <!-- Tear drops -->
+  <path d="M 52 38 Q 50 42 52 44 Q 54 42 52 38" fill="#87CEEB"/>
+  <path d="M 76 38 Q 74 42 76 44 Q 78 42 76 38" fill="#87CEEB"/>
+</svg>

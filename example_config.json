@@ -1,0 +1,18 @@
+{
+  "default_context": {
+    "project_name": "My Adventure Game",
+    "project_slug": "my_adventure_game",
+    "author_name": "Your Name",
+    "godot_version": "4.5",
+    "player_types": "warrior,mage,rogue",
+    "custom_player_svgs": "",
+    "include_npc": "yes",
+    "custom_npc_svg": "",
+    "game_mode": "endless",
+    "time_limit": "60",
+    "target_score": "100",
+    "victory_sound": "",
+    "level_count": "3",
+    "levels_config": "./example_levels.json"
+  }
+}

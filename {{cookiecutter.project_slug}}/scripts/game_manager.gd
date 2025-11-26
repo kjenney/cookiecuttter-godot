@@ -15,15 +15,38 @@ var game_over = false
 # UI reference
 var ui_layer = null
 
+# Level configuration (if using multi-level mode)
+var level_config = null
+
 func _ready():
 	print("Game Manager ready!")
+
+	# Check if we're using LevelManager (multi-level mode)
+	if has_node("/root/LevelManager"):
+		var level_mgr = get_node("/root/LevelManager")
+		level_config = level_mgr.get_current_level_config()
+
+		if level_config:
+			# Override target score with level-specific value
+			target_score = level_config.get("target_score", target_score)
+			print("Using level config - target score: ", target_score)
+
 	print("Game mode: ", game_mode)
 	if game_mode == "timed":
 		print("Time limit: ", time_limit, " seconds")
 		time_remaining = float(time_limit)
-	elif game_mode == "score_target":
-		print("Target score: ", target_score)
-	show_player_select()
+
+	# Show player select only if not coming from a previous level
+	if has_node("/root/LevelManager"):
+		var level_mgr = get_node("/root/LevelManager")
+		if level_mgr.current_level_index > 0:
+			# Continuing from previous level - skip player select
+			var saved_type = level_mgr.get_player_type()
+			_start_level_with_player(saved_type)
+		else:
+			show_player_select()
+	else:
+		show_player_select()
 
 func show_player_select():
 	print("Showing player select menu...")
@@ -37,6 +60,15 @@ func show_player_select():
 	print("Game tree paused: ", get_tree().paused)
 
 func _on_player_selected(player_type: String):
+	# Save player type to LevelManager if available
+	if has_node("/root/LevelManager"):
+		var level_mgr = get_node("/root/LevelManager")
+		level_mgr.set_player_type(player_type)
+
+	_start_level_with_player(player_type)
+
+func _start_level_with_player(player_type: String):
+	"""Start the level with the specified player type"""
 	get_tree().paused = false
 	game_started = true
 
@@ -108,6 +140,19 @@ func update_ui():
 		target_label.text = "Target: " + str(target_score)
 
 func end_game(won: bool, message: String):
+	# Check if we have more levels to load (multi-level mode)
+	if won and has_node("/root/LevelManager"):
+		var level_mgr = get_node("/root/LevelManager")
+		if level_mgr.is_multi_level():
+			if level_mgr.next_level():
+				# More levels exist - load next level
+				print("Advancing to next level...")
+				level_mgr.load_current_level()
+				return
+			else:
+				# All levels completed
+				message = "Congratulations! All levels completed!"
+
 	game_over = true
 	print(message)
 	get_tree().paused = true
@@ -137,4 +182,15 @@ func _input(event):
 
 func restart_game():
 	get_tree().paused = false
+
+	# Check if we're in multi-level mode
+	if has_node("/root/LevelManager"):
+		var level_mgr = get_node("/root/LevelManager")
+		if level_mgr.is_multi_level():
+			# Restart from first level
+			level_mgr.restart_levels()
+			level_mgr.load_current_level()
+			return
+
+	# Single level mode - just reload
 	get_tree().reload_current_scene()

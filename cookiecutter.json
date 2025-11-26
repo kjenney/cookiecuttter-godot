@@ -10,5 +10,7 @@
   "game_mode": "endless",
   "time_limit": "60",
   "target_score": "100",
-  "victory_sound": ""
+  "victory_sound": "",
+  "level_count": "1",
+  "levels_config": ""
 }
