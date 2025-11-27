@@ -265,8 +265,8 @@ def generate_level_scene(level_config, level_index):
     has_npc = npc_config.get('enabled', False)
     npc_message = npc_config.get('message', 'Hi, how are you?')
 
-    # Calculate load_steps - add 1 for level-specific NPC texture if NPC is enabled
-    load_steps = 6 if has_npc else 4
+    # Calculate load_steps - add 2 for level-specific NPC (texture + sub_resource) if NPC is enabled
+    load_steps = 7 if has_npc else 4
 
     # Generate collectible positions in a grid pattern
     collectible_positions = []
@@ -294,6 +294,27 @@ def generate_level_scene(level_config, level_index):
         scene_content += '[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="4_npc"]\n'
         scene_content += f'[ext_resource type="Texture2D" path="res://assets/{level_name}_npc.svg" id="5_npc_texture"]\n'
         scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="6_ui"]\n\n'
+        # Add custom SpriteFrames sub-resource for level-specific NPC texture
+        scene_content += '''[sub_resource type="SpriteFrames" id="SpriteFrames_NPC"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_npc_texture")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_npc_texture")
+}],
+"loop": true,
+"name": &"talking",
+"speed": 8.0
+}]
+
+'''
     else:
         scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="5_ui"]\n\n'
 
@@ -325,8 +346,8 @@ position = Vector2({x}, {y})
 position = Vector2(576, 150)
 npc_message = "''' + npc_message + '''"
 
-[node name="Sprite2D" parent="NPC"]
-texture = ExtResource("5_npc_texture")
+[node name="AnimatedSprite2D" parent="NPC"]
+sprite_frames = SubResource("SpriteFrames_NPC")
 
 '''
 

@@ -5,9 +5,10 @@ A CookieCutter template for creating a 2D game in Godot 4 that uses CookieCutter
 ## Features
 
 - **Player Selection**: Choose between different player types (Blue, Red, Green) at game start
-- **Player Character**: CharacterBody2D with WASD/Arrow key movement
+- **Player Character**: CharacterBody2D with WASD/Arrow key movement and sprite animations
 - **Collectible Objects**: Area2D objects that disappear when collected
 - **NPC with Speech Bubble**: Optional NPC that displays a speech bubble when the player approaches
+- **Sprite Animations**: Animated player (idle, walking, collecting) and NPC (idle, talking) sprites
 - **Score Tracking**: On-screen UI with score display and game mode information
 - **Multiple Game Modes**: Choose between endless, timed, or score target gameplay
   - **Endless Mode**: Play at your own pace to reach the target score
@@ -464,6 +465,156 @@ Understanding when to use `custom_npc_svg` vs. level-specific NPC SVGs:
     ]
   }
   ```
+
+## Animation System
+
+The template includes a sprite animation system for both the player character and NPCs. Animations are implemented using Godot's `AnimatedSprite2D` node with `SpriteFrames` resources.
+
+### Player Animations
+
+The player character has three animations that automatically switch based on gameplay:
+
+- **Idle Animation**: Plays when the player is standing still
+  - Animation name: `"idle"`
+  - Speed: 5.0 FPS
+  - Loops continuously
+- **Walk Animation**: Plays when the player is moving (any direction)
+  - Animation name: `"walk"`
+  - Speed: 10.0 FPS
+  - Loops continuously
+  - Automatically triggered when velocity > 10
+- **Collect Animation**: Plays when the player collects an item
+  - Animation name: `"collect"`
+  - Speed: 15.0 FPS
+  - Plays once (no loop)
+  - Triggered by collectible pickup
+  - Returns to idle or walk animation after completion
+
+**How It Works:**
+1. The player script (`player.gd`) automatically loads the player type's SVG texture
+2. The texture is applied to all three animation frames at runtime
+3. Animations switch automatically based on player state (moving, idle, collecting)
+4. The collection animation has priority and plays to completion before resuming other animations
+
+### NPC Animations
+
+NPCs have two animations that switch based on interaction with the player:
+
+- **Idle Animation**: Plays when no player is nearby
+  - Animation name: `"idle"`
+  - Speed: 5.0 FPS
+  - Loops continuously
+- **Talking Animation**: Plays when the player is within range and speech bubble is shown
+  - Animation name: `"talking"`
+  - Speed: 8.0 FPS (slightly faster than idle for visual variety)
+  - Loops continuously
+  - Automatically triggered when player enters NPC collision area
+  - Returns to idle when player leaves
+
+**How It Works:**
+1. The base NPC scene (`npc.tscn`) defines default animation frames
+2. In multi-level games, each level's scene overrides the NPC's `SpriteFrames` with level-specific textures
+3. The NPC script (`npc.gd`) switches between idle and talking based on the `body_entered`/`body_exited` signals
+4. The talking animation plays while the speech bubble is visible
+
+### Animation Frame Structure
+
+All animations use single-frame animations (one texture per animation) by default:
+
+```gdscript
+# Player animations (defined in player.tscn)
+SpriteFrames:
+  - Animation "idle": 1 frame, loops, 5 FPS
+  - Animation "walk": 1 frame, loops, 10 FPS
+  - Animation "collect": 1 frame, no loop, 15 FPS
+
+# NPC animations (defined in npc.tscn, overridden per level)
+SpriteFrames:
+  - Animation "idle": 1 frame, loops, 5 FPS
+  - Animation "talking": 1 frame, loops, 8 FPS
+```
+
+### Customizing Animations
+
+**Adding More Frames:**
+
+To create multi-frame animations (e.g., actual walking animation with multiple poses):
+
+1. Open the scene file in Godot (e.g., `scenes/player.tscn`)
+2. Select the `AnimatedSprite2D` node
+3. In the Inspector, click on the `SpriteFrames` resource
+4. Select the animation you want to edit (e.g., "walk")
+5. Add multiple texture frames
+6. Adjust the animation speed as needed
+
+**Changing Animation Speeds:**
+
+Edit the `SpriteFrames` resource in the scene file, or modify the speed values directly in the `.tscn` file:
+
+```
+"name": &"walk",
+"speed": 10.0  # Change this value
+```
+
+**Adding New Animations:**
+
+1. Open the scene in Godot
+2. Edit the `SpriteFrames` resource
+3. Add a new animation with the "New Anim" button
+4. Add frames to the animation
+5. Update the corresponding script to trigger the animation:
+
+```gdscript
+# Example: Adding a "jump" animation to the player
+if animated_sprite:
+    animated_sprite.play("jump")
+```
+
+### Level-Specific NPC Textures
+
+In multi-level games, each level can have a unique NPC appearance while using the same animation structure:
+
+- The scene generation system creates a custom `SpriteFrames` resource for each level
+- The custom resource uses the level-specific texture for both idle and talking animations
+- This is handled automatically by the `hooks/post_gen_project.py` script
+- To use a custom NPC texture for a level, specify it in your `levels_config` JSON:
+
+```json
+{
+  "levels": [
+    {
+      "name": "level_1",
+      "npc": {
+        "enabled": true,
+        "message": "Welcome!",
+        "svg": "./assets/svgs/friendly_guide.svg"
+      }
+    }
+  ]
+}
+```
+
+The system will:
+1. Copy the SVG to `assets/level_1_npc.svg`
+2. Create a `SpriteFrames` sub-resource in the level scene
+3. Apply the texture to both idle and talking animations
+4. Override the NPC's `AnimatedSprite2D` to use the custom frames
+
+### Technical Details
+
+**Player Animation Implementation:**
+- Scene: `{{cookiecutter.project_slug}}/scenes/player.tscn`
+- Script: `{{cookiecutter.project_slug}}/scripts/player.gd`
+- The script dynamically populates animation frames based on player type
+- Uses `_setup_animations_with_texture()` to apply textures to all animations
+- Animation switching handled in `_update_animation()` and `_physics_process()`
+
+**NPC Animation Implementation:**
+- Base Scene: `{{cookiecutter.project_slug}}/scenes/npc.tscn`
+- Script: `{{cookiecutter.project_slug}}/scripts/npc.gd`
+- Level scenes override the `AnimatedSprite2D.sprite_frames` property
+- Animation switching triggered by `show_speech_bubble()` and `hide_speech_bubble()`
+- Connected to `body_entered` and `body_exited` signals
 
 ## Customization Ideas
 

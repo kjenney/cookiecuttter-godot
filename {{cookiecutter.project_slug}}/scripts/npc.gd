@@ -4,6 +4,7 @@ extends Area2D
 
 @onready var speech_bubble = $SpeechBubble
 @onready var speech_label = $SpeechBubble/Label
+@onready var animated_sprite = $AnimatedSprite2D
 
 var player_nearby = false
 
@@ -32,6 +33,10 @@ func _ready():
 
 	print("[NPC] Collision layer: ", collision_layer, " | Collision mask: ", collision_mask)
 
+	# Start with idle animation
+	if animated_sprite:
+		animated_sprite.play("idle")
+
 func _on_body_entered(body):
 	print("[NPC] Body entered: ", body.name, " (type: ", body.get_class(), ")")
 	if body.name == "Player":
@@ -58,7 +63,17 @@ func show_speech_bubble():
 		# Text is already set in the scene file, just log it
 		print("[NPC] Speech text: ", speech_label.text)
 
+	# Switch to talking animation
+	if animated_sprite:
+		animated_sprite.play("talking")
+		print("[NPC] Playing talking animation")
+
 func hide_speech_bubble():
 	if speech_bubble:
 		speech_bubble.visible = false
 		print("[NPC] Speech bubble hidden")
+
+	# Switch back to idle animation
+	if animated_sprite:
+		animated_sprite.play("idle")
+		print("[NPC] Playing idle animation")
