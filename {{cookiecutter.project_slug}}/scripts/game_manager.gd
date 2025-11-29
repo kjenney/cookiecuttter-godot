@@ -139,32 +139,31 @@ func update_ui():
 	if not ui_layer:
 		return
 
+	# Get UI label references once
+	var score_label = ui_layer.get_node_or_null("ScoreLabel")
+	var target_label = ui_layer.get_node_or_null("TargetLabel")
+	var timer_label = ui_layer.get_node_or_null("TimerLabel")
+
 	# Hide score/target UI on celebration levels
 	if is_celebration_level:
-		var score_label = ui_layer.get_node_or_null("ScoreLabel")
 		if score_label:
 			score_label.visible = false
-		var target_label = ui_layer.get_node_or_null("TargetLabel")
 		if target_label:
 			target_label.visible = false
-		var timer_label = ui_layer.get_node_or_null("TimerLabel")
 		if timer_label:
 			timer_label.visible = false
 		return
 
 	# Update score label
-	var score_label = ui_layer.get_node_or_null("ScoreLabel")
 	if score_label:
 		score_label.text = "Score: " + str(score)
 
 	# Update timer label for timed mode
 	if game_mode == "timed":
-		var timer_label = ui_layer.get_node_or_null("TimerLabel")
 		if timer_label:
 			timer_label.text = "Time: " + str(int(time_remaining)) + "s"
 
 	# Always update target label (target score applies to all modes)
-	var target_label = ui_layer.get_node_or_null("TargetLabel")
 	if target_label:
 		target_label.text = "Target: " + str(target_score)
 

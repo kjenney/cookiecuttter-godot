@@ -244,6 +244,189 @@ def load_levels_config():
     return levels
 
 
+def generate_collectible_positions(count, layout='grid', screen_width=1152, screen_height=648):
+    """
+    Generate collectible positions based on the specified layout pattern.
+
+    Args:
+        count: Number of collectibles to position
+        layout: Layout pattern to use (grid, circle, random, horizontal, vertical, diagonal, corners, scatter)
+        screen_width: Width of the game screen (default: 1152)
+        screen_height: Height of the game screen (default: 648)
+
+    Returns:
+        List of (x, y) tuples for collectible positions
+    """
+    import random
+    import math
+
+    positions = []
+
+    if count <= 0:
+        return positions
+
+    # Define safe margins to keep collectibles away from edges
+    margin_x = 150
+    margin_y = 150
+    safe_width = screen_width - (margin_x * 2)
+    safe_height = screen_height - (margin_y * 2)
+
+    if layout == 'grid':
+        # Arrange collectibles in a grid pattern
+        cols = min(count, 4)
+        rows = (count + cols - 1) // cols
+        spacing_x = safe_width / (cols + 1)
+        spacing_y = safe_height / (rows + 1)
+
+        for i in range(count):
+            row = i // cols
+            col = i % cols
+            x = margin_x + spacing_x * (col + 1)
+            y = margin_y + spacing_y * (row + 1)
+            positions.append((x, y))
+
+    elif layout == 'circle':
+        # Arrange collectibles in a circular pattern
+        center_x = screen_width / 2
+        center_y = screen_height / 2
+        radius = min(safe_width, safe_height) / 2.5
+
+        for i in range(count):
+            angle = (2 * math.pi * i) / count
+            x = center_x + radius * math.cos(angle)
+            y = center_y + radius * math.sin(angle)
+            positions.append((x, y))
+
+    elif layout == 'random':
+        # Randomly place collectibles with minimum spacing
+        min_spacing = 120
+        max_attempts = 100
+
+        for _ in range(count):
+            placed = False
+            for _ in range(max_attempts):
+                x = random.uniform(margin_x, screen_width - margin_x)
+                y = random.uniform(margin_y, screen_height - margin_y)
+
+                # Check if position is far enough from existing positions
+                too_close = False
+                for px, py in positions:
+                    distance = math.sqrt((x - px) ** 2 + (y - py) ** 2)
+                    if distance < min_spacing:
+                        too_close = True
+                        break
+
+                if not too_close:
+                    positions.append((x, y))
+                    placed = True
+                    break
+
+            # If we couldn't place with spacing, place anywhere
+            if not placed:
+                x = random.uniform(margin_x, screen_width - margin_x)
+                y = random.uniform(margin_y, screen_height - margin_y)
+                positions.append((x, y))
+
+    elif layout == 'horizontal':
+        # Arrange collectibles in a horizontal line
+        y = screen_height / 2
+        spacing = safe_width / (count + 1)
+
+        for i in range(count):
+            x = margin_x + spacing * (i + 1)
+            positions.append((x, y))
+
+    elif layout == 'vertical':
+        # Arrange collectibles in a vertical line
+        x = screen_width / 2
+        spacing = safe_height / (count + 1)
+
+        for i in range(count):
+            y = margin_y + spacing * (i + 1)
+            positions.append((x, y))
+
+    elif layout == 'diagonal':
+        # Arrange collectibles diagonally from top-left to bottom-right
+        spacing_x = safe_width / (count + 1)
+        spacing_y = safe_height / (count + 1)
+
+        for i in range(count):
+            x = margin_x + spacing_x * (i + 1)
+            y = margin_y + spacing_y * (i + 1)
+            positions.append((x, y))
+
+    elif layout == 'corners':
+        # Place collectibles in corners, then fill with grid
+        corner_positions = [
+            (margin_x + 50, margin_y + 50),  # Top-left
+            (screen_width - margin_x - 50, margin_y + 50),  # Top-right
+            (margin_x + 50, screen_height - margin_y - 50),  # Bottom-left
+            (screen_width - margin_x - 50, screen_height - margin_y - 50)  # Bottom-right
+        ]
+
+        # Add corners first
+        for i in range(min(count, 4)):
+            positions.append(corner_positions[i])
+
+        # If more than 4 collectibles, fill the rest with grid in the center
+        if count > 4:
+            remaining = count - 4
+            center_x = screen_width / 2
+            center_y = screen_height / 2
+
+            # Create a small grid for remaining collectibles
+            cols = min(remaining, 3)
+            rows = (remaining + cols - 1) // cols
+            spacing_x = 200
+            spacing_y = 150
+            start_x = center_x - (cols - 1) * spacing_x / 2
+            start_y = center_y - (rows - 1) * spacing_y / 2
+
+            for i in range(remaining):
+                row = i // cols
+                col = i % cols
+                x = start_x + col * spacing_x
+                y = start_y + row * spacing_y
+                positions.append((x, y))
+
+    elif layout == 'scatter':
+        # More spread out random placement (larger minimum spacing)
+        min_spacing = 180
+        max_attempts = 100
+
+        for _ in range(count):
+            placed = False
+            for _ in range(max_attempts):
+                x = random.uniform(margin_x, screen_width - margin_x)
+                y = random.uniform(margin_y, screen_height - margin_y)
+
+                # Check if position is far enough from existing positions
+                too_close = False
+                for px, py in positions:
+                    distance = math.sqrt((x - px) ** 2 + (y - py) ** 2)
+                    if distance < min_spacing:
+                        too_close = True
+                        break
+
+                if not too_close:
+                    positions.append((x, y))
+                    placed = True
+                    break
+
+            # If we couldn't place with spacing, reduce spacing requirement
+            if not placed:
+                min_spacing = 120
+                x = random.uniform(margin_x, screen_width - margin_x)
+                y = random.uniform(margin_y, screen_height - margin_y)
+                positions.append((x, y))
+
+    else:
+        # Default to grid if unknown layout
+        return generate_collectible_positions(count, 'grid', screen_width, screen_height)
+
+    return positions
+
+
 def generate_level_scene(level_config, level_index):
     """
     Generate a level scene file (.tscn) based on level configuration
@@ -252,6 +435,7 @@ def generate_level_scene(level_config, level_index):
     npc_config = level_config.get('npc', {})
     collectibles_count = level_config.get('collectibles', 4)
     bg_color = level_config.get('background_color', '#1a1a1a')
+    layout = level_config.get('layout', 'grid')
 
     # Convert hex color to Godot Color format
     def hex_to_godot_color(hex_color):
@@ -268,19 +452,8 @@ def generate_level_scene(level_config, level_index):
     # Calculate load_steps - add 2 for level-specific NPC (texture + sub_resource) if NPC is enabled
     load_steps = 7 if has_npc else 4
 
-    # Generate collectible positions in a grid pattern
-    collectible_positions = []
-    if collectibles_count > 0:
-        # Arrange collectibles in a rough grid
-        cols = min(collectibles_count, 4)
-        rows = (collectibles_count + cols - 1) // cols
-
-        for i in range(collectibles_count):
-            row = i // cols
-            col = i % cols
-            x = 200 + (col * 250)
-            y = 200 + (row * 150)
-            collectible_positions.append((x, y))
+    # Generate collectible positions using the specified layout
+    collectible_positions = generate_collectible_positions(collectibles_count, layout)
 
     # Build the scene file content
     scene_content = f'''[gd_scene load_steps={load_steps} format=3 uid="uid://level_{level_index}_uid"]

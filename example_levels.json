@@ -10,7 +10,8 @@
       },
       "collectibles": 4,
       "target_score": 40,
-      "background_color": "#1a1a1a"
+      "background_color": "#1a1a1a",
+      "layout": "circle"
     },
     {
       "name": "level_2",
@@ -22,7 +23,8 @@
       },
       "collectibles": 6,
       "target_score": 60,
-      "background_color": "#2a1a2a"
+      "background_color": "#2a1a2a",
+      "layout": "horizontal"
     },
     {
       "name": "level_3",
@@ -34,7 +36,8 @@
       },
       "collectibles": 8,
       "target_score": 80,
-      "background_color": "#3a1a1a"
+      "background_color": "#3a1a1a",
+      "layout": "random"
     },
     {
       "name": "celebration",
@@ -48,7 +51,8 @@
       },
       "collectibles": 0,
       "target_score": 0,
-      "background_color": "#de1fdc"
+      "background_color": "#de1fdc",
+      "layout": "grid"
     }
   ]
 }

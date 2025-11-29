@@ -19,6 +19,7 @@ A CookieCutter template for creating a 2D game in Godot 4 that uses CookieCutter
   - **Custom Level Configuration**: Full control via JSON for each level's properties
   - **Level-Specific NPCs**: Each level can have unique NPCs with custom messages
   - **Player Persistence**: Selected character type carries across all levels
+  - **8 Layout Patterns**: Choose from grid, circle, random, horizontal, vertical, diagonal, corners, or scatter layouts for collectible placement
 - **Victory Feedback**: Auto-generated victory sound plays when winning (customizable)
 - **Quick Restart**: Press any key (SPACE, ENTER, arrows) to instantly restart after game over
 - **Clean Structure**: Organized scenes and scripts folders
@@ -332,7 +333,8 @@ For full control, create a JSON file defining each level's properties. The templ
       },
       "collectibles": 4,
       "target_score": 40,
-      "background_color": "#1a1a1a"
+      "background_color": "#1a1a1a",
+      "layout": "circle"
     },
     {
       "name": "level_2",
@@ -344,7 +346,8 @@ For full control, create a JSON file defining each level's properties. The templ
       },
       "collectibles": 6,
       "target_score": 60,
-      "background_color": "#2a1a2a"
+      "background_color": "#2a1a2a",
+      "layout": "horizontal"
     },
     {
       "name": "level_3",
@@ -356,7 +359,8 @@ For full control, create a JSON file defining each level's properties. The templ
       },
       "collectibles": 8,
       "target_score": 80,
-      "background_color": "#3a1a1a"
+      "background_color": "#3a1a1a",
+      "layout": "random"
     },
     {
       "name": "celebration",
@@ -370,7 +374,8 @@ For full control, create a JSON file defining each level's properties. The templ
       },
       "collectibles": 0,
       "target_score": 0,
-      "background_color": "#1a3a1a"
+      "background_color": "#1a3a1a",
+      "layout": "grid"
     }
   ]
 }
@@ -384,6 +389,19 @@ Each level in the JSON array can have the following properties:
 - **collectibles** (required): Number of collectible items to spawn
 - **target_score** (required): Score needed to complete this level (set to 0 for celebration levels)
 - **background_color** (required): Hex color for the level background (e.g., "#1a1a1a")
+- **layout** (optional): Collectible placement pattern (default: "grid")
+  - Available layouts:
+    - **grid**: Arranges collectibles in rows and columns (default, evenly distributed)
+    - **circle**: Arranges collectibles in a circular pattern around the center
+    - **horizontal**: Places collectibles in a single horizontal line across the screen
+    - **vertical**: Places collectibles in a single vertical line down the screen
+    - **diagonal**: Arranges collectibles diagonally from top-left to bottom-right
+    - **corners**: Places first 4 collectibles in corners, additional ones in center grid
+    - **random**: Randomly places collectibles with minimum spacing to avoid overlap
+    - **scatter**: Similar to random but with larger spacing between collectibles
+  - Example: `"layout": "circle"`
+  - If omitted, defaults to "grid" layout
+  - Different layouts can create varied gameplay challenges
 - **celebration_level** (optional): Set to `true` to create a celebration level (default: `false`)
   - Celebration levels automatically win after a delay - no score needed
   - Perfect for victory screens after completing all challenging levels
@@ -412,6 +430,126 @@ Each level in the JSON array can have the following properties:
 4. **Next Level**: Same player character, new level layout and target
 5. **Game Complete**: After completing all levels, shows final victory message
 6. **Restart**: Press any key to restart from Level 1
+
+### Collectible Layout System
+
+The template includes 8 different layout patterns for positioning collectibles in each level. Each layout creates a unique gameplay challenge and visual variety.
+
+#### Available Layouts
+
+**Grid Layout** (`"layout": "grid"`)
+- Default layout if none specified
+- Arranges collectibles in evenly-spaced rows and columns
+- Maximum 4 columns, automatic row calculation
+- Best for: Balanced gameplay, traditional level design
+- Example: 6 collectibles → 2 rows of 3 columns
+
+**Circle Layout** (`"layout": "circle"`)
+- Arranges collectibles in a perfect circle around the screen center
+- Radius automatically calculated based on screen size
+- Best for: Circular movement patterns, dodge-style gameplay
+- Example: 4 collectibles → positioned at 0°, 90°, 180°, 270°
+
+**Horizontal Layout** (`"layout": "horizontal"`)
+- Places all collectibles in a single horizontal line
+- Evenly spaced across the screen width
+- Centered vertically
+- Best for: Side-scrolling feel, linear progression
+- Example: 6 collectibles → single row from left to right
+
+**Vertical Layout** (`"layout": "vertical"`)
+- Places all collectibles in a single vertical line
+- Evenly spaced down the screen height
+- Centered horizontally
+- Best for: Vertical movement challenges, platformer-style
+- Example: 5 collectibles → single column from top to bottom
+
+**Diagonal Layout** (`"layout": "diagonal"`)
+- Arranges collectibles diagonally from top-left to bottom-right
+- Forms a straight diagonal line
+- Best for: Diagonal movement patterns, unique visual appeal
+- Example: 4 collectibles → evenly spaced diagonal line
+
+**Corners Layout** (`"layout": "corners"`)
+- Places first 4 collectibles in the four corners of the screen
+- Additional collectibles (if more than 4) arranged in center grid
+- Best for: Exploration-focused gameplay, screen coverage
+- Example: 6 collectibles → 4 in corners + 2 in center
+
+**Random Layout** (`"layout": "random"`)
+- Randomly places collectibles across the screen
+- Maintains minimum spacing (120 pixels) to avoid overlap
+- Different positions each time the game is generated
+- Best for: Unpredictable challenges, varied gameplay
+- Example: 8 collectibles → scattered randomly with spacing
+
+**Scatter Layout** (`"layout": "scatter"`)
+- Similar to random but with larger spacing (180 pixels)
+- Creates more spread-out, sparse distributions
+- Best for: Exploration, larger movement patterns
+- Example: 5 collectibles → widely scattered positions
+
+#### Layout Configuration Examples
+
+**Simple Layout Assignment:**
+```json
+{
+  "name": "level_1",
+  "collectibles": 4,
+  "target_score": 40,
+  "background_color": "#1a1a1a",
+  "layout": "circle"
+}
+```
+
+**Progressive Layout Difficulty:**
+```json
+{
+  "levels": [
+    {
+      "name": "level_1",
+      "collectibles": 4,
+      "layout": "grid",
+      "comment": "Easy: organized pattern"
+    },
+    {
+      "name": "level_2",
+      "collectibles": 6,
+      "layout": "circle",
+      "comment": "Medium: requires circular movement"
+    },
+    {
+      "name": "level_3",
+      "collectibles": 8,
+      "layout": "random",
+      "comment": "Hard: unpredictable positions"
+    }
+  ]
+}
+```
+
+#### Layout Behavior Details
+
+- **Screen Boundaries**: All layouts include safety margins (150 pixels) to keep collectibles away from screen edges
+- **Automatic Scaling**: Layouts automatically adjust spacing based on the number of collectibles
+- **Player Collision**: The player is positioned at screen center (576, 324) and layouts avoid this position
+- **NPC Compatibility**: All layouts work with or without NPCs in the level
+- **Random Seed**: Random and scatter layouts use Python's random module (different each generation)
+
+#### Choosing the Right Layout
+
+Consider these factors when selecting layouts:
+
+1. **Difficulty Progression**: Start with predictable layouts (grid, horizontal) and progress to unpredictable ones (random, scatter)
+2. **Collectible Count**:
+   - 1-4 collectibles: Circle, corners, diagonal work well
+   - 5-8 collectibles: Grid, horizontal, vertical, scatter
+   - 8+ collectibles: Grid, random, scatter
+3. **Gameplay Style**:
+   - Methodical collection: Grid, horizontal, vertical
+   - Exploration: Random, scatter, corners
+   - Movement challenge: Circle, diagonal
+4. **Visual Variety**: Mix different layouts across levels to keep gameplay fresh
 
 ### Notes
 

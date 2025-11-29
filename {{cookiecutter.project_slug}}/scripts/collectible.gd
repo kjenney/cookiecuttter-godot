@@ -11,4 +11,5 @@ func _on_body_entered(body):
 		if main_scene.has_method("add_score"):
 			main_scene.add_score(10)
 
-		queue_free()
+		# Use call_deferred to avoid removing node during physics callback
+		call_deferred("queue_free")
