@@ -427,6 +427,92 @@ def generate_collectible_positions(count, layout='grid', screen_width=1152, scre
     return positions
 
 
+def generate_platform_layout(collectible_count, layout='horizontal'):
+    """
+    Generate platform positions for a side-scrolling platformer level.
+
+    Returns a list of platform dictionaries with position, width, and type.
+    """
+    platforms = []
+
+    # Always add ground platform(s)
+    # Create a ground that spans the level width
+    platforms.append({
+        'x': 0,
+        'y': 600,
+        'width': 3000,  # Long ground for side-scrolling
+        'height': 48,
+        'type': 'ground'
+    })
+
+    # Add jump platforms based on collectible count and layout
+    if collectible_count > 0:
+        # Distribute platforms across the level
+        platform_spacing = 400
+        num_platforms = min(collectible_count + 2, 8)  # More platforms for more collectibles
+
+        for i in range(num_platforms):
+            x = 200 + (i * platform_spacing)
+            # Vary height for interesting platforming
+            if i % 3 == 0:
+                y = 450
+            elif i % 3 == 1:
+                y = 350
+            else:
+                y = 250
+
+            platforms.append({
+                'x': x,
+                'y': y,
+                'width': 200,
+                'height': 40,
+                'type': 'platform'
+            })
+
+    return platforms
+
+
+def generate_platformer_collectible_positions(count, platforms, layout='horizontal'):
+    """
+    Generate collectible positions for platformer levels.
+    Places collectibles on or near platforms.
+    """
+    import random
+
+    positions = []
+
+    if count <= 0:
+        return positions
+
+    # Get platforms excluding ground
+    jump_platforms = [p for p in platforms if p['type'] == 'platform']
+
+    if not jump_platforms:
+        # Fallback: place on ground
+        for i in range(count):
+            x = 300 + (i * 200)
+            y = 550  # Above ground
+            positions.append((x, y))
+        return positions
+
+    # Distribute collectibles across platforms
+    for i in range(count):
+        platform_index = i % len(jump_platforms)
+        platform = jump_platforms[platform_index]
+
+        # Place collectible above platform
+        x = platform['x'] + (platform['width'] / 2)
+        # Add some variation
+        if count > len(jump_platforms):
+            x += ((i // len(jump_platforms)) - 0.5) * 60
+
+        y = platform['y'] - 100  # Above the platform
+
+        positions.append((x, y))
+
+    return positions
+
+
 def generate_level_scene(level_config, level_index):
     """
     Generate a level scene file (.tscn) based on level configuration
@@ -449,11 +535,14 @@ def generate_level_scene(level_config, level_index):
     has_npc = npc_config.get('enabled', False)
     npc_message = npc_config.get('message', 'Hi, how are you?')
 
-    # Calculate load_steps - add 2 for level-specific NPC (texture + sub_resource) if NPC is enabled
-    load_steps = 7 if has_npc else 4
+    # Calculate load_steps - add 2 for level-specific NPC (texture + sub_resource) if NPC is enabled, +1 for platform
+    load_steps = 8 if has_npc else 5
 
-    # Generate collectible positions using the specified layout
-    collectible_positions = generate_collectible_positions(collectibles_count, layout)
+    # Generate platform platformers
+    platform_positions = generate_platform_layout(collectibles_count, layout)
+
+    # Generate collectible positions using the specified layout (adjusted for platformer)
+    collectible_positions = generate_platformer_collectible_positions(collectibles_count, platform_positions, layout)
 
     # Build the scene file content
     scene_content = f'''[gd_scene load_steps={load_steps} format=3 uid="uid://level_{level_index}_uid"]
@@ -461,18 +550,19 @@ def generate_level_scene(level_config, level_index):
 [ext_resource type="PackedScene" uid="uid://b8j5k2x4y1z3" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://c9k6l3y5z2a4" path="res://scenes/collectible.tscn" id="2_collectible"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="3_manager"]
+[ext_resource type="PackedScene" uid="uid://d5k7m9n1p3q5r" path="res://scenes/platform.tscn" id="4_platform"]
 '''
 
     if has_npc:
-        scene_content += '[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="4_npc"]\n'
-        scene_content += f'[ext_resource type="Texture2D" path="res://assets/{level_name}_npc.svg" id="5_npc_texture"]\n'
-        scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="6_ui"]\n\n'
+        scene_content += '[ext_resource type="PackedScene" uid="uid://npc1a2b3c4d5e" path="res://scenes/npc.tscn" id="5_npc"]\n'
+        scene_content += f'[ext_resource type="Texture2D" path="res://assets/{level_name}_npc.svg" id="6_npc_texture"]\n'
+        scene_content += '[ext_resource type="PackedScene" uid="uid://ui1a2b3c4d5e6" path="res://scenes/ui_layer.tscn" id="7_ui"]\n\n'
         # Add custom SpriteFrames sub-resource for level-specific NPC texture
         scene_content += '''[sub_resource type="SpriteFrames" id="SpriteFrames_NPC"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_npc_texture")
+"texture": ExtResource("6_npc_texture")
 }],
 "loop": true,
 "name": &"idle",
@@ -480,7 +570,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_npc_texture")
+"texture": ExtResource("6_npc_texture")
 }],
 "loop": true,
 "name": &"talking",
@@ -496,13 +586,34 @@ process_mode = 3
 script = ExtResource("3_manager")
 
 [node name="Background" type="ColorRect" parent="."]
-offset_right = 1152.0
+offset_right = 3000.0
 offset_bottom = 648.0
 color = ''' + godot_color + '''
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 process_mode = 1
-position = Vector2(576, 324)
+position = Vector2(200, 400)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+offset = Vector2(200, 0)
+limit_left = 0
+limit_top = 0
+limit_right = 3000
+limit_bottom = 648
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+
+'''
+
+    # Add platforms
+    for i, platform in enumerate(platform_positions, 1):
+        # Scale platform based on width/height
+        scale_x = platform['width'] / 200.0  # Default platform width is 200
+        scale_y = platform['height'] / 40.0  # Default platform height is 40
+
+        scene_content += f'''[node name="Platform{i}" parent="." instance=ExtResource("4_platform")]
+position = Vector2({platform['x'] + platform['width']/2}, {platform['y']})
+scale = Vector2({scale_x}, {scale_y})
 
 '''
 
@@ -515,8 +626,8 @@ position = Vector2({x}, {y})
 
     # Add NPC if enabled
     if has_npc:
-        scene_content += '''[node name="NPC" parent="." instance=ExtResource("4_npc")]
-position = Vector2(576, 150)
+        scene_content += '''[node name="NPC" parent="." instance=ExtResource("5_npc")]
+position = Vector2(800, 550)
 npc_message = "''' + npc_message + '''"
 
 [node name="AnimatedSprite2D" parent="NPC"]
@@ -525,7 +636,7 @@ sprite_frames = SubResource("SpriteFrames_NPC")
 '''
 
     # Add UI layer - use correct ExtResource ID based on whether NPC is present
-    ui_resource_id = "6_ui" if has_npc else "5_ui"
+    ui_resource_id = "7_ui" if has_npc else "5_ui"
     scene_content += f'''[node name="UILayer" parent="." instance=ExtResource("{ui_resource_id}")]
 process_mode = 1
 '''

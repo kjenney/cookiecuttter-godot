@@ -1,6 +1,9 @@
 extends CharacterBody2D
 
 @export var speed = 300.0
+@export var jump_velocity = -700.0
+@export var gravity = 980.0
+
 var player_type = "blue"
 var is_collecting = false
 
@@ -92,27 +95,35 @@ func _update_animation():
 	if is_collecting or not animated_sprite:
 		return
 
-	# Check if moving
-	if velocity.length() > 10:
+	# Check if moving horizontally (running)
+	if abs(velocity.x) > 10:
 		if animated_sprite.animation != "walk":
 			animated_sprite.play("walk")
+		# Flip sprite based on direction
+		if velocity.x < 0:
+			animated_sprite.flip_h = true
+		elif velocity.x > 0:
+			animated_sprite.flip_h = false
 	else:
 		if animated_sprite.animation != "idle":
 			animated_sprite.play("idle")
 
-func _physics_process(_delta):
-	var direction_x = Input.get_axis("ui_left", "ui_right")
-	var direction_y = Input.get_axis("ui_up", "ui_down")
+func _physics_process(delta):
+	# Apply gravity
+	if not is_on_floor():
+		velocity.y += gravity * delta
 
-	if direction_x:
-		velocity.x = direction_x * speed
+	# Handle jump
+	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+		velocity.y = jump_velocity
+
+	# Get horizontal input
+	var direction = Input.get_axis("ui_left", "ui_right")
+
+	if direction:
+		velocity.x = direction * speed
 	else:
 		velocity.x = move_toward(velocity.x, 0, speed)
-
-	if direction_y:
-		velocity.y = direction_y * speed
-	else:
-		velocity.y = move_toward(velocity.y, 0, speed)
 
 	move_and_slide()
 

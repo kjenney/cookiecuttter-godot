@@ -1,14 +1,16 @@
-# Godot 4 2D Builder
+# Godot 4 2D Platformer Builder
 
-A CookieCutter template for creating a 2D game in Godot 4 that uses CookieCutter configuration to guide how the game is built.
+A CookieCutter template for creating a side-scrolling 2D platformer game in Godot 4 that uses CookieCutter configuration to guide how the game is built.
 
 ## Features
 
 - **Player Selection**: Choose between different player types (Blue, Red, Green) at game start
-- **Player Character**: CharacterBody2D with WASD/Arrow key movement and sprite animations
-- **Collectible Objects**: Area2D objects that disappear when collected
-- **NPC with Speech Bubble**: Optional NPC that displays a speech bubble when the player approaches
-- **Sprite Animations**: Animated player (idle, walking, collecting) and NPC (idle, talking) sprites
+- **Platformer Physics**: CharacterBody2D with gravity, jumping, and left/right movement
+- **Side-Scrolling Levels**: Horizontally scrolling levels with camera following the player
+- **Platforms & Ground**: Automatically generated platform layouts with grass-style ground
+- **Collectible Objects**: Area2D objects placed on or above platforms to collect
+- **NPC with Speech Bubble**: Optional NPCs positioned on the ground that display speech bubbles
+- **Sprite Animations**: Animated player (idle, running, collecting) and NPC (idle, talking) sprites with sprite flipping
 - **Score Tracking**: On-screen UI with score display and game mode information
 - **Multiple Game Modes**: Choose between endless, timed, or score target gameplay
   - **Endless Mode**: Play at your own pace to reach the target score
@@ -211,10 +213,14 @@ your_project/
    - Use **arrow keys** or **click** to choose your player type
    - Press **ENTER** or **SPACE** (or click "Start Game") to begin
    - Selected option is highlighted with arrows (→ Player ←) and brighter color
-4. Use WASD or Arrow keys to move the player
-5. Collect the golden objects to increase your score
-6. Walk near the NPC to see a speech bubble appear (if enabled)
+4. **Platformer Controls**:
+   - Use **Left/Right Arrow Keys** or **A/D** to move horizontally
+   - Press **SPACE** or **UP Arrow** or **W** to jump
+   - Character sprite automatically flips based on movement direction
+5. Jump across platforms to collect the golden objects and increase your score
+6. Walk near NPCs on the ground to see speech bubbles appear (if enabled)
 7. Watch the on-screen UI for your score and game mode information
+8. Camera automatically follows the player as you move through the level
 
 ### Game Mode Behaviors
 
@@ -754,17 +760,46 @@ The system will:
 - Animation switching triggered by `show_speech_bubble()` and `hide_speech_bubble()`
 - Connected to `body_entered` and `body_exited` signals
 
+## Platformer Features
+
+### Physics System
+- **Gravity**: Constant downward force (default: 980 pixels/second²)
+- **Jump**: Upward velocity impulse (default: -500 pixels/second)
+- **Ground Detection**: Uses `is_on_floor()` to allow jumping only when on platforms
+- **Horizontal Movement**: 300 pixels/second default speed with friction
+
+### Camera System
+- **Following Camera**: Camera2D attached to player, follows horizontal movement
+- **Look-Ahead Offset**: Camera positioned 200 pixels ahead of player for better view
+- **Smooth Motion**: Position smoothing enabled at 5.0 speed for fluid camera movement
+- **Boundaries**: Camera limits set to 0-3000 horizontal, 0-648 vertical
+
+### Platform Generation
+- **Ground Platform**: 3000-pixel wide ground surface for side-scrolling
+- **Jump Platforms**: 6-8 platforms automatically placed at varying heights
+- **Platform Spacing**: 400 pixels apart horizontally
+- **Height Variation**: Platforms alternate between 250, 350, and 450 pixel heights
+- **Scalable**: Platforms can be scaled to different widths for level design variety
+
+### Collectible Placement
+- **Platform-Aware**: Collectibles placed 100 pixels above platforms
+- **Distribution**: Automatically distributed across jump platforms
+- **Multiple Per Platform**: Extra collectibles get slight horizontal offset for variety
+
 ## Customization Ideas
 
-- **Custom Player**: Use `custom_player_svgs` to provide unique character designs for each player type (warrior, mage, rogue, etc.), or use the same SVG for all types
-- **Unique Character Classes**: Create visually distinct characters for each player type - e.g., a knight for "warrior", wizard for "mage", archer for "rogue"
+- **Custom Player**: Use `custom_player_svgs` to provide unique character designs for each player type (warrior, mage, rogue, etc.)
+- **Platform Variety**: Modify `generate_platform_layout()` in `hooks/post_gen_project.py` to create different platform patterns
+- **Physics Tuning**: Adjust gravity, jump_velocity, and speed in player.gd for different game feel
 - **Game Modes**: Mix and match game modes with different time limits and target scores for varied gameplay
-- **Multi-Level Adventures**: Use the level configuration system to create progressive campaigns with increasing difficulty
-- **Themed Levels**: Design levels with unique visual themes, collectible counts, and NPCs for storytelling
-- **More Collectibles**: Add different types of collectibles with varying point values
-- **Sound Effects**: Add audio when collecting objects or when the timer is running low
-- **Enemies**: Create enemy characters that the player must avoid
-- **Power-ups**: Add special collectibles that give temporary abilities or bonus time
+- **Multi-Level Adventures**: Use the level configuration system to create progressive platforming campaigns
+- **Themed Levels**: Design levels with unique visual themes, platform arrangements, and NPCs
+- **Collectible Variety**: Add different types of collectibles with varying point values
+- **Sound Effects**: Add audio when jumping, landing, or collecting objects
+- **Enemies**: Create enemy characters that patrol platforms
+- **Power-ups**: Add double-jump, speed boosts, or temporary flight abilities
+- **Moving Platforms**: Extend platform scene to support AnimatableBody2D for moving platforms
+- **Hazards**: Add spikes, pits, or other obstacles to avoid
 
 ## Testing
 
@@ -792,8 +827,10 @@ godot --headless -s addons/gut/gut_cmdln.gd
 - **ENTER** or **SPACE**: Start the game with selected player
 - **Mouse Click**: Click buttons to select or start
 
-### Gameplay
-- **Arrow Keys** or **WASD**: Move the player character
+### Platformer Gameplay
+- **Left/Right Arrow Keys** or **A/D**: Move the player character horizontally
+- **SPACE** or **UP Arrow** or **W**: Jump
+- **Physics**: Gravity automatically pulls the player down, can only jump when on the ground
 
 ### Game Over
 - **Any Key** (SPACE, ENTER, or arrows): Restart the game
