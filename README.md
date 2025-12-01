@@ -1,844 +1,248 @@
 # Godot 4 2D Platformer Builder
 
-A CookieCutter template for creating a side-scrolling 2D platformer game in Godot 4 that uses CookieCutter configuration to guide how the game is built.
+A CookieCutter template for creating side-scrolling 2D platformer games in Godot 4 with configuration-driven development.
+
+## Quick Start
+
+```bash
+# Install cookiecutter
+pip install cookiecutter
+
+# Generate your game
+cookiecutter .
+
+# Open in Godot
+cd your_project_name
+godot project.godot
+```
+
+Press **F5** to play!
 
 ## Features
 
-- **Player Selection**: Choose between different player types (Blue, Red, Green) at game start
-- **Platformer Physics**: CharacterBody2D with gravity, jumping, and left/right movement
-- **Side-Scrolling Levels**: Horizontally scrolling levels with camera following the player
-- **Platforms & Ground**: Automatically generated platform layouts with grass-style ground
-- **Collectible Objects**: Area2D objects placed on or above platforms to collect
-- **NPC with Speech Bubble**: Optional NPCs positioned on the ground that display speech bubbles
-- **Sprite Animations**: Animated player (idle, running, collecting) and NPC (idle, talking) sprites with sprite flipping
-- **Score Tracking**: On-screen UI with score display and game mode information
-- **Multiple Game Modes**: Choose between endless, timed, or score target gameplay
-  - **Endless Mode**: Play at your own pace to reach the target score
-  - **Timed Mode**: Race against time to reach the target score before time runs out
-  - **Score Target Mode**: Focus purely on reaching the target score (same as endless but with clearer intent)
-- **Multi-Level Support**: Create games with multiple progressive levels
-  - **Auto-Generated Levels**: Automatically create levels with increasing difficulty
-  - **Custom Level Configuration**: Full control via JSON for each level's properties
-  - **Level-Specific NPCs**: Each level can have unique NPCs with custom messages
-  - **Player Persistence**: Selected character type carries across all levels
-  - **8 Layout Patterns**: Choose from grid, circle, random, horizontal, vertical, diagonal, corners, or scatter layouts for collectible placement
-- **Victory Feedback**: Auto-generated victory sound plays when winning (customizable)
-- **Quick Restart**: Press any key (SPACE, ENTER, arrows) to instantly restart after game over
-- **Clean Structure**: Organized scenes and scripts folders
-- **Ready to Extend**: Simple foundation for building more complex games
+- **🎮 Platformer Physics**: Gravity, jumping, and smooth horizontal movement
+- **📜 Side-Scrolling Levels**: Camera follows player through horizontally scrolling levels
+- **🎨 Multiple Player Types**: Choose between different character types at game start
+- **⭐ Collectible System**: Items placed strategically on platforms
+- **🎭 Sprite Animations**: Animated characters with idle, running, and collecting animations
+- **💬 NPC Interactions**: Optional NPCs with speech bubbles and custom messages
+- **🏆 Multiple Game Modes**: Endless, timed, or score target gameplay
+- **📊 Multi-Level Support**: Create progressive campaigns with up to any number of levels
+- **🎨 8 Layout Patterns**: Grid, circle, horizontal, vertical, diagonal, corners, random, scatter
+- **🎵 Custom Assets**: Use your own SVG graphics and audio files
+- **✅ Unit Tests**: Pre-configured GUT testing framework
 
 ## Prerequisites
 
 - [Godot 4.0+](https://godotengine.org/download)
 - [Cookiecutter](https://cookiecutter.readthedocs.io/en/latest/installation.html)
 
-## Installation
+## Basic Usage
 
-Install Cookiecutter if you haven't already:
-
-```bash
-pip install cookiecutter
-```
-
-## Usage
-
-### Option 1: Interactive Mode (Prompts)
-
-Create a new project and answer prompts for each configuration option:
-
+### Interactive Mode
 ```bash
 cookiecutter .
+# Answer prompts for each setting
 ```
 
-You will be prompted for all configuration values (project_name, player_types, game_mode, level_count, etc.)
-
-### Option 2: Command-Line Arguments
-
-Pass values directly without prompts:
-
+### Command Line
 ```bash
-cookiecutter . project_name="My Game" player_types="warrior,mage" custom_player_svgs="warrior:/path/to/warrior.svg,mage:/path/to/mage.svg"
+cookiecutter . project_name="My Game" level_count="3" player_types="warrior,mage,rogue"
 ```
 
-### Option 3: Config File (Recommended for complex setups)
-
-Use a JSON config file to specify only the values you want to customize:
-
+### Config File (Recommended)
 ```bash
 cookiecutter . --no-input --config-file example_config.json
 ```
 
-**Important Notes:**
-- Cookiecutter config files must use the `default_context` wrapper
-- You only need to specify parameters you want to change from their defaults (defined in `cookiecutter.json`)
-- Any omitted parameters will use their default values automatically
-- The `levels_config` parameter inside the config can reference a SEPARATE JSON file for level definitions
+## Example Configuration
 
-Example `example_config.json`:
+**example_config.json:**
 ```json
 {
   "default_context": {
     "project_name": "My Adventure Game",
     "project_slug": "my_adventure_game",
-    "author_name": "Your Name",
-    "godot_version": "4.5",
     "player_types": "warrior,mage,rogue",
-    "custom_player_svgs": "",
-    "include_npc": "yes",
-    "custom_npc_svg": "",
-    "game_mode": "endless",
-    "time_limit": "60",
-    "target_score": "100",
-    "victory_sound": "",
+    "game_mode": "timed",
+    "time_limit": "90",
     "level_count": "3",
     "levels_config": "./example_levels.json"
   }
 }
 ```
 
-**Minimal Config Example** (only customize what you need):
-```json
-{
-  "default_context": {
-    "project_name": "My Game",
-    "project_slug": "my_game",
-    "level_count": "3",
-    "levels_config": "./example_levels.json"
-  }
-}
-```
-This minimal config will use defaults for all other parameters (include_npc="yes", game_mode="endless", player_types="blue,red,green", etc.)
-
-The repository includes:
-- `example_config.json` - Complete example showing all available parameters
-- `example_levels.json` - Level definitions referenced by the `levels_config` parameter
-
-### Configuration Parameters
-
-The following parameters are available. Default values (from `cookiecutter.json`) are shown in parentheses. You only need to specify values you want to override:
-
-- **project_name**: Display name of your game (e.g., "My Awesome Game")
-- **project_slug**: Folder name for your project (e.g., "my_awesome_game")
-- **author_name**: Your name
-- **godot_version**: Godot version (default: "4.5")
-- **player_types**: Comma-separated list of player types available in-game (default: "blue,red,green")
-  - Examples: "blue,red,green", "red,blue", "blue", "warrior,mage,rogue"
-  - The in-game menu will dynamically show only these options
-- **custom_player_svgs**: Paths to type-specific SVG files for each player type (optional)
-  - Format: `"type1:path1,type2:path2,type3:path3"`
-  - Example: `"blue:~/blue_hero.svg,red:~/red_warrior.svg,green:~/green_mage.svg"`
-  - This allows completely different character designs for each player type
-  - Leave empty to use the default player sprite with color modulation
-  - Supports absolute paths, relative paths, and `~` expansion
-  - Types not specified will use the default SVG
-  - To use the same custom SVG for all types: `"blue:~/hero.svg,red:~/hero.svg,green:~/hero.svg"`
-- **include_npc**: Include an NPC in the game (default: "yes")
-  - Set to "yes" to include an NPC that displays a speech bubble when approached
-  - Set to "no" to exclude the NPC
-- **custom_npc_svg**: Path to a custom SVG file for the NPC (optional)
-  - **SINGLE-LEVEL MODE ONLY** (when `level_count: "1"`)
-  - This sets a global NPC sprite used in the single main scene
-  - Leave empty to use the default NPC sprite
-  - Supports absolute paths, relative paths, and `~` expansion
-  - Examples: `/path/to/npc.svg`, `./assets/npc.svg`, `~/images/npc.svg`
-  - **For multi-level games**: Ignore this parameter and specify NPC SVGs per-level in your `levels_config` JSON file instead (see "Multi-Level Configuration" below)
-- **game_mode**: Game mode to use (default: "endless")
-  - Options: "endless", "timed", "score_target"
-  - **endless**: Play indefinitely with a target score to reach
-  - **timed**: Race against the clock to reach the target score before time runs out
-  - **score_target**: Focus solely on reaching the target score (no time pressure)
-- **time_limit**: Time limit in seconds for timed mode (default: "60")
-  - Only used when game_mode is "timed"
-  - Example: "30", "120", "300"
-- **target_score**: Target score to win the game (default: "100")
-  - **Applies to ALL game modes** - reaching this score triggers victory
-  - Example: "50", "200", "500"
-- **victory_sound**: Path to a custom WAV/OGG file for the victory sound (optional)
-  - Leave empty to use the auto-generated victory chime
-  - Supports absolute paths, relative paths, and `~` expansion
-  - Example: `/path/to/victory.wav`, `./sounds/win.ogg`
-- **level_count**: Number of levels in the game (default: "1")
-  - Set to "1" for single-level games
-  - Set to "2" or higher for multi-level progression
-  - Example: "3", "5", "10"
-  - When > 1, the game creates multiple levels with increasing difficulty
-- **levels_config**: Path to a JSON file defining custom level configuration (optional)
-  - Leave empty to auto-generate levels with default settings
-  - Use a custom JSON file for full control over each level's properties
-  - Supports absolute paths, relative paths, and `~` expansion
-  - See "Multi-Level Configuration" section below for JSON format
-  - Example: `./my_levels.json`, `~/game_configs/levels.json`
-
-## Project Structure
-
-```
-your_project/
-├── project.godot          # Godot project configuration
-├── icon.svg              # Project icon
-├── levels_config.json    # Level configuration (if level_count > 1)
-├── scenes/               # Scene files (.tscn)
-│   ├── player.tscn      # Player character scene
-│   ├── collectible.tscn # Collectible object scene
-│   ├── npc.tscn         # NPC scene (if include_npc=yes)
-│   ├── player_select.tscn # Player selection menu
-│   ├── ui_layer.tscn    # UI overlay for score and game mode info
-│   ├── main.tscn        # Main game scene (single-level mode)
-│   ├── level_1.tscn     # Level 1 scene (multi-level mode)
-│   ├── level_2.tscn     # Level 2 scene (multi-level mode)
-│   └── ...              # Additional levels (if level_count > 2)
-├── scripts/             # GDScript files (.gd)
-│   ├── player.gd        # Player movement logic
-│   ├── collectible.gd   # Collectible behavior
-│   ├── npc.gd           # NPC behavior (if include_npc=yes)
-│   ├── player_select.gd # Player selection menu logic
-│   ├── ui_layer.gd      # UI layer management
-│   ├── level_manager.gd # Level transitions and state (if level_count > 1)
-│   └── game_manager.gd  # Score tracking, game state, and game mode logic
-└── assets/              # Game assets (images, sounds, etc.)
-    ├── player_blue.svg  # Blue player sprite (customizable via custom_player_svgs)
-    ├── player_red.svg   # Red player sprite (customizable via custom_player_svgs)
-    ├── player_green.svg # Green player sprite (customizable via custom_player_svgs)
-    ├── npc.svg          # NPC sprite (if include_npc=yes, customizable via custom_npc_svg)
-    ├── level_1_npc.svg  # Level 1 NPC sprite (multi-level mode)
-    ├── level_2_npc.svg  # Level 2 NPC sprite (multi-level mode)
-    ├── ...              # Additional level NPCs
-    └── victory.wav      # Victory sound (auto-generated or customizable via victory_sound)
-```
-
-## Getting Started
-
-1. Open the generated project in Godot 4
-2. Press F5 or click the Play button to run the game
-3. **Player Selection Screen**:
-   - Use **arrow keys** or **click** to choose your player type
-   - Press **ENTER** or **SPACE** (or click "Start Game") to begin
-   - Selected option is highlighted with arrows (→ Player ←) and brighter color
-4. **Platformer Controls**:
-   - Use **Left/Right Arrow Keys** or **A/D** to move horizontally
-   - Press **SPACE** or **UP Arrow** or **W** to jump
-   - Character sprite automatically flips based on movement direction
-5. Jump across platforms to collect the golden objects and increase your score
-6. Walk near NPCs on the ground to see speech bubbles appear (if enabled)
-7. Watch the on-screen UI for your score and game mode information
-8. Camera automatically follows the player as you move through the level
-
-### Game Mode Behaviors
-
-**All game modes have a target score** - reaching it triggers victory with a sound effect!
-
-- **Endless Mode**: No time pressure. Take as long as you need to reach the target score displayed in the top-left corner.
-- **Timed Mode**: A countdown timer and target score appear in the top-left corner. Race to reach the target score before time runs out. You can win by reaching the target, or lose when time expires.
-- **Score Target Mode**: Similar to endless mode - just the target score is shown. Purely focused on reaching that goal.
-
-### Game Over and Restart
-
-**Winning (reaching target score in any mode):**
-1. Victory sound plays (pleasant 3-note chime)
-2. Game pauses and displays "You win! Target score reached!"
-3. Press **any key** (SPACE, ENTER, or arrow keys) to restart and play again
-
-**Losing (timed mode only - time runs out):**
-1. Game pauses and displays "Time's up! Final score: X"
-2. Press **any key** (SPACE, ENTER, or arrow keys) to restart and try again
-
-## Example Configurations
-
-Create a timed challenge game:
-```bash
-cookiecutter . project_name="Speed Runner" game_mode=timed time_limit=30 include_npc=no
-```
-
-Create a score-based game with custom player:
-```bash
-cookiecutter . project_name="Gem Collector" game_mode=score_target target_score=200 custom_player_svgs="blue:~/my_character.svg,red:~/my_character.svg,green:~/my_character.svg"
-```
-
-Create a game with a custom victory sound:
-```bash
-cookiecutter . project_name="My Game" game_mode=score_target target_score=50 victory_sound=./sounds/victory.wav
-```
-
-Create a game with unique character designs for each player type:
-```bash
-cookiecutter . project_name="RPG Adventure" player_types="warrior,mage,rogue" custom_player_svgs="warrior:~/warrior.svg,mage:~/mage.svg,rogue:~/rogue.svg"
-```
-
-Create a 3-level game with auto-generated levels:
-```bash
-cookiecutter . project_name="Level Quest" level_count=3
-```
-
-Create a multi-level game with custom level configuration:
-```bash
-cookiecutter . project_name="Adventure Game" level_count=3 levels_config=./example_levels.json
-```
-
-Use a complete config file for a complex multi-level setup:
-```bash
-cookiecutter . --no-input --config-file example_config.json
-```
-
-This uses `example_config.json` (which contains ALL parameters including project_name, author_name, etc.) and references `example_levels.json` (which defines the level structure).
-
-## Multi-Level Configuration
-
-The template supports creating games with multiple levels that progressively increase in difficulty. When you set `level_count` to a value greater than 1, the game automatically creates multiple levels with:
-
-- **Player Persistence**: Your selected player type carries across all levels
-- **Level Progression**: Reaching the target score advances to the next level
-- **Individual Level Scenes**: Each level has its own scene file with custom properties
-- **Level-Specific NPCs**: Each level can have unique NPCs with different messages
-
-### Configuration File Structure
-
-When using config files for multi-level games, you work with TWO separate JSON files:
-
-1. **Cookiecutter Config** (`example_config.json`) - Contains ALL template parameters
-   - Base settings: project_name, author_name, godot_version, etc.
-   - Game settings: player_types, game_mode, target_score, etc.
-   - **levels_config parameter**: Path to the levels JSON file
-
-2. **Levels Config** (`example_levels.json`) - Defines level-specific properties
-   - Referenced BY the `levels_config` parameter in the cookiecutter config
-   - Contains array of level objects with collectibles, NPCs, colors, etc.
-
-**Workflow:**
-```bash
-# You pass ONE file to cookiecutter
-cookiecutter . --no-input --config-file example_config.json
-
-# Inside example_config.json, the levels_config parameter points to the second file
-# "levels_config": "./example_levels.json"
-
-# The post-generation hook reads example_levels.json to create the levels
-```
-
-### Auto-Generated Levels
-
-If you don't provide a `levels_config` file, levels are auto-generated with increasing difficulty:
-
-- **Collectibles**: Increases by 2 each level (Level 1: 4, Level 2: 6, Level 3: 8, etc.)
-- **Target Score**: Increases by 20 each level (Level 1: 40, Level 2: 60, Level 3: 80, etc.)
-- **Background Color**: Varies slightly per level
-- **NPCs**: If enabled, each level gets a unique NPC with a welcome message
-
-### Custom Level Configuration
-
-For full control, create a JSON file defining each level's properties. The template includes `example_levels.json` as a reference:
-
+**example_levels.json:**
 ```json
 {
   "levels": [
     {
       "name": "level_1",
-      "npc": {
-        "enabled": true,
-        "type": "guide",
-        "message": "Welcome to Level 1! Collect 40 points to advance.",
-        "svg": ""
-      },
       "collectibles": 4,
       "target_score": 40,
       "background_color": "#1a1a1a",
-      "layout": "circle"
-    },
-    {
-      "name": "level_2",
-      "npc": {
-        "enabled": true,
-        "type": "warrior",
-        "message": "Level 2 is tougher! Reach 60 points!",
-        "svg": ""
-      },
-      "collectibles": 6,
-      "target_score": 60,
-      "background_color": "#2a1a2a",
-      "layout": "horizontal"
-    },
-    {
-      "name": "level_3",
-      "npc": {
-        "enabled": true,
-        "type": "boss",
-        "message": "Final level! Get 80 points to win!",
-        "svg": ""
-      },
-      "collectibles": 8,
-      "target_score": 80,
-      "background_color": "#3a1a1a",
-      "layout": "random"
-    },
-    {
-      "name": "celebration",
-      "celebration_level": true,
-      "auto_win_delay": 5,
-      "npc": {
-        "enabled": true,
-        "type": "victory",
-        "message": "Congratulations! You've completed all levels!",
-        "svg": ""
-      },
-      "collectibles": 0,
-      "target_score": 0,
-      "background_color": "#1a3a1a",
-      "layout": "grid"
-    }
-  ]
-}
-```
-
-### Level Configuration Properties
-
-Each level in the JSON array can have the following properties:
-
-- **name** (required): Scene filename (e.g., "level_1", "tutorial_stage", "boss_fight", "celebration")
-- **collectibles** (required): Number of collectible items to spawn
-- **target_score** (required): Score needed to complete this level (set to 0 for celebration levels)
-- **background_color** (required): Hex color for the level background (e.g., "#1a1a1a")
-- **layout** (optional): Collectible placement pattern (default: "grid")
-  - Available layouts:
-    - **grid**: Arranges collectibles in rows and columns (default, evenly distributed)
-    - **circle**: Arranges collectibles in a circular pattern around the center
-    - **horizontal**: Places collectibles in a single horizontal line across the screen
-    - **vertical**: Places collectibles in a single vertical line down the screen
-    - **diagonal**: Arranges collectibles diagonally from top-left to bottom-right
-    - **corners**: Places first 4 collectibles in corners, additional ones in center grid
-    - **random**: Randomly places collectibles with minimum spacing to avoid overlap
-    - **scatter**: Similar to random but with larger spacing between collectibles
-  - Example: `"layout": "circle"`
-  - If omitted, defaults to "grid" layout
-  - Different layouts can create varied gameplay challenges
-- **celebration_level** (optional): Set to `true` to create a celebration level (default: `false`)
-  - Celebration levels automatically win after a delay - no score needed
-  - Perfect for victory screens after completing all challenging levels
-  - Hides score/target UI elements
-  - See `auto_win_delay` below
-- **auto_win_delay** (optional): Seconds to wait before auto-winning on celebration levels (default: 5)
-  - Only used when `celebration_level: true`
-  - Victory sound plays automatically after this delay
-  - Example: `"auto_win_delay": 5` waits 5 seconds then shows victory
-- **npc** (optional): NPC configuration for this level
-  - **enabled**: `true` to include an NPC in this level, `false` to exclude
-  - **type**: Descriptive type name for documentation purposes (e.g., "guide", "warrior", "boss")
-  - **message**: Text displayed in the speech bubble when player approaches the NPC
-  - **svg**: Path to a custom SVG file for **this specific level's NPC**
-    - Supports absolute paths, relative paths, and `~` expansion
-    - Examples: `"./assets/svgs/damsel.svg"`, `"~/images/boss.svg"`, `"/path/to/npc.svg"`
-    - Leave as empty string `""` to use a default NPC sprite
-    - Each level can have its own unique NPC appearance
-    - **This is independent of** the `custom_npc_svg` parameter (which only applies to single-level games)
-
-### Multi-Level Game Flow
-
-1. **Game Start**: Player selects their character type (only shown on first level)
-2. **Play Level**: Collect items to reach the target score
-3. **Level Complete**: Victory sound plays, then automatically advances to next level
-4. **Next Level**: Same player character, new level layout and target
-5. **Game Complete**: After completing all levels, shows final victory message
-6. **Restart**: Press any key to restart from Level 1
-
-### Collectible Layout System
-
-The template includes 8 different layout patterns for positioning collectibles in each level. Each layout creates a unique gameplay challenge and visual variety.
-
-#### Available Layouts
-
-**Grid Layout** (`"layout": "grid"`)
-- Default layout if none specified
-- Arranges collectibles in evenly-spaced rows and columns
-- Maximum 4 columns, automatic row calculation
-- Best for: Balanced gameplay, traditional level design
-- Example: 6 collectibles → 2 rows of 3 columns
-
-**Circle Layout** (`"layout": "circle"`)
-- Arranges collectibles in a perfect circle around the screen center
-- Radius automatically calculated based on screen size
-- Best for: Circular movement patterns, dodge-style gameplay
-- Example: 4 collectibles → positioned at 0°, 90°, 180°, 270°
-
-**Horizontal Layout** (`"layout": "horizontal"`)
-- Places all collectibles in a single horizontal line
-- Evenly spaced across the screen width
-- Centered vertically
-- Best for: Side-scrolling feel, linear progression
-- Example: 6 collectibles → single row from left to right
-
-**Vertical Layout** (`"layout": "vertical"`)
-- Places all collectibles in a single vertical line
-- Evenly spaced down the screen height
-- Centered horizontally
-- Best for: Vertical movement challenges, platformer-style
-- Example: 5 collectibles → single column from top to bottom
-
-**Diagonal Layout** (`"layout": "diagonal"`)
-- Arranges collectibles diagonally from top-left to bottom-right
-- Forms a straight diagonal line
-- Best for: Diagonal movement patterns, unique visual appeal
-- Example: 4 collectibles → evenly spaced diagonal line
-
-**Corners Layout** (`"layout": "corners"`)
-- Places first 4 collectibles in the four corners of the screen
-- Additional collectibles (if more than 4) arranged in center grid
-- Best for: Exploration-focused gameplay, screen coverage
-- Example: 6 collectibles → 4 in corners + 2 in center
-
-**Random Layout** (`"layout": "random"`)
-- Randomly places collectibles across the screen
-- Maintains minimum spacing (120 pixels) to avoid overlap
-- Different positions each time the game is generated
-- Best for: Unpredictable challenges, varied gameplay
-- Example: 8 collectibles → scattered randomly with spacing
-
-**Scatter Layout** (`"layout": "scatter"`)
-- Similar to random but with larger spacing (180 pixels)
-- Creates more spread-out, sparse distributions
-- Best for: Exploration, larger movement patterns
-- Example: 5 collectibles → widely scattered positions
-
-#### Layout Configuration Examples
-
-**Simple Layout Assignment:**
-```json
-{
-  "name": "level_1",
-  "collectibles": 4,
-  "target_score": 40,
-  "background_color": "#1a1a1a",
-  "layout": "circle"
-}
-```
-
-**Progressive Layout Difficulty:**
-```json
-{
-  "levels": [
-    {
-      "name": "level_1",
-      "collectibles": 4,
       "layout": "grid",
-      "comment": "Easy: organized pattern"
-    },
-    {
-      "name": "level_2",
-      "collectibles": 6,
-      "layout": "circle",
-      "comment": "Medium: requires circular movement"
-    },
-    {
-      "name": "level_3",
-      "collectibles": 8,
-      "layout": "random",
-      "comment": "Hard: unpredictable positions"
-    }
-  ]
-}
-```
-
-#### Layout Behavior Details
-
-- **Screen Boundaries**: All layouts include safety margins (150 pixels) to keep collectibles away from screen edges
-- **Automatic Scaling**: Layouts automatically adjust spacing based on the number of collectibles
-- **Player Collision**: The player is positioned at screen center (576, 324) and layouts avoid this position
-- **NPC Compatibility**: All layouts work with or without NPCs in the level
-- **Random Seed**: Random and scatter layouts use Python's random module (different each generation)
-
-#### Choosing the Right Layout
-
-Consider these factors when selecting layouts:
-
-1. **Difficulty Progression**: Start with predictable layouts (grid, horizontal) and progress to unpredictable ones (random, scatter)
-2. **Collectible Count**:
-   - 1-4 collectibles: Circle, corners, diagonal work well
-   - 5-8 collectibles: Grid, horizontal, vertical, scatter
-   - 8+ collectibles: Grid, random, scatter
-3. **Gameplay Style**:
-   - Methodical collection: Grid, horizontal, vertical
-   - Exploration: Random, scatter, corners
-   - Movement challenge: Circle, diagonal
-4. **Visual Variety**: Mix different layouts across levels to keep gameplay fresh
-
-### Notes
-
-- **Single Player Selection**: The player selection screen only appears once at the start of the game
-- **Player Persistence**: Your chosen player type is maintained across all levels
-- **Unique NPCs**: Each level can have its own NPC with a custom message and appearance
-- **Progressive Difficulty**: Design levels to gradually increase in challenge (more collectibles, higher scores, etc.)
-- **Extensible Format**: The JSON format allows adding custom properties for future features
-
-### NPC Configuration Quick Reference
-
-Understanding when to use `custom_npc_svg` vs. level-specific NPC SVGs:
-
-**Single-Level Games** (`level_count: "1"`):
-- Use the `custom_npc_svg` parameter in your cookiecutter config
-- This sets a global NPC sprite for the single main scene
-- Example:
-  ```json
-  {
-    "default_context": {
-      "level_count": "1",
-      "custom_npc_svg": "./my_npc.svg"
-    }
-  }
-  ```
-
-**Multi-Level Games** (`level_count: "2"` or higher):
-- Ignore the `custom_npc_svg` parameter entirely
-- Instead, specify NPC SVGs per-level in your `levels_config` JSON file
-- Each level can have a different NPC sprite
-- Example in `example_levels.json`:
-  ```json
-  {
-    "levels": [
-      {
-        "name": "level_1",
-        "npc": {
-          "enabled": true,
-          "message": "Welcome!",
-          "svg": "./assets/svgs/friendly_npc.svg"
-        }
-      },
-      {
-        "name": "level_2",
-        "npc": {
-          "enabled": true,
-          "message": "Tougher challenge!",
-          "svg": "./assets/svgs/warrior_npc.svg"
-        }
-      }
-    ]
-  }
-  ```
-
-## Animation System
-
-The template includes a sprite animation system for both the player character and NPCs. Animations are implemented using Godot's `AnimatedSprite2D` node with `SpriteFrames` resources.
-
-### Player Animations
-
-The player character has three animations that automatically switch based on gameplay:
-
-- **Idle Animation**: Plays when the player is standing still
-  - Animation name: `"idle"`
-  - Speed: 5.0 FPS
-  - Loops continuously
-- **Walk Animation**: Plays when the player is moving (any direction)
-  - Animation name: `"walk"`
-  - Speed: 10.0 FPS
-  - Loops continuously
-  - Automatically triggered when velocity > 10
-- **Collect Animation**: Plays when the player collects an item
-  - Animation name: `"collect"`
-  - Speed: 15.0 FPS
-  - Plays once (no loop)
-  - Triggered by collectible pickup
-  - Returns to idle or walk animation after completion
-
-**How It Works:**
-1. The player script (`player.gd`) automatically loads the player type's SVG texture
-2. The texture is applied to all three animation frames at runtime
-3. Animations switch automatically based on player state (moving, idle, collecting)
-4. The collection animation has priority and plays to completion before resuming other animations
-
-### NPC Animations
-
-NPCs have two animations that switch based on interaction with the player:
-
-- **Idle Animation**: Plays when no player is nearby
-  - Animation name: `"idle"`
-  - Speed: 5.0 FPS
-  - Loops continuously
-- **Talking Animation**: Plays when the player is within range and speech bubble is shown
-  - Animation name: `"talking"`
-  - Speed: 8.0 FPS (slightly faster than idle for visual variety)
-  - Loops continuously
-  - Automatically triggered when player enters NPC collision area
-  - Returns to idle when player leaves
-
-**How It Works:**
-1. The base NPC scene (`npc.tscn`) defines default animation frames
-2. In multi-level games, each level's scene overrides the NPC's `SpriteFrames` with level-specific textures
-3. The NPC script (`npc.gd`) switches between idle and talking based on the `body_entered`/`body_exited` signals
-4. The talking animation plays while the speech bubble is visible
-
-### Animation Frame Structure
-
-All animations use single-frame animations (one texture per animation) by default:
-
-```gdscript
-# Player animations (defined in player.tscn)
-SpriteFrames:
-  - Animation "idle": 1 frame, loops, 5 FPS
-  - Animation "walk": 1 frame, loops, 10 FPS
-  - Animation "collect": 1 frame, no loop, 15 FPS
-
-# NPC animations (defined in npc.tscn, overridden per level)
-SpriteFrames:
-  - Animation "idle": 1 frame, loops, 5 FPS
-  - Animation "talking": 1 frame, loops, 8 FPS
-```
-
-### Customizing Animations
-
-**Adding More Frames:**
-
-To create multi-frame animations (e.g., actual walking animation with multiple poses):
-
-1. Open the scene file in Godot (e.g., `scenes/player.tscn`)
-2. Select the `AnimatedSprite2D` node
-3. In the Inspector, click on the `SpriteFrames` resource
-4. Select the animation you want to edit (e.g., "walk")
-5. Add multiple texture frames
-6. Adjust the animation speed as needed
-
-**Changing Animation Speeds:**
-
-Edit the `SpriteFrames` resource in the scene file, or modify the speed values directly in the `.tscn` file:
-
-```
-"name": &"walk",
-"speed": 10.0  # Change this value
-```
-
-**Adding New Animations:**
-
-1. Open the scene in Godot
-2. Edit the `SpriteFrames` resource
-3. Add a new animation with the "New Anim" button
-4. Add frames to the animation
-5. Update the corresponding script to trigger the animation:
-
-```gdscript
-# Example: Adding a "jump" animation to the player
-if animated_sprite:
-    animated_sprite.play("jump")
-```
-
-### Level-Specific NPC Textures
-
-In multi-level games, each level can have a unique NPC appearance while using the same animation structure:
-
-- The scene generation system creates a custom `SpriteFrames` resource for each level
-- The custom resource uses the level-specific texture for both idle and talking animations
-- This is handled automatically by the `hooks/post_gen_project.py` script
-- To use a custom NPC texture for a level, specify it in your `levels_config` JSON:
-
-```json
-{
-  "levels": [
-    {
-      "name": "level_1",
       "npc": {
         "enabled": true,
-        "message": "Welcome!",
-        "svg": "./assets/svgs/friendly_guide.svg"
+        "message": "Welcome to Level 1!",
+        "svg": ""
       }
     }
   ]
 }
-```
-
-The system will:
-1. Copy the SVG to `assets/level_1_npc.svg`
-2. Create a `SpriteFrames` sub-resource in the level scene
-3. Apply the texture to both idle and talking animations
-4. Override the NPC's `AnimatedSprite2D` to use the custom frames
-
-### Technical Details
-
-**Player Animation Implementation:**
-- Scene: `{{cookiecutter.project_slug}}/scenes/player.tscn`
-- Script: `{{cookiecutter.project_slug}}/scripts/player.gd`
-- The script dynamically populates animation frames based on player type
-- Uses `_setup_animations_with_texture()` to apply textures to all animations
-- Animation switching handled in `_update_animation()` and `_physics_process()`
-
-**NPC Animation Implementation:**
-- Base Scene: `{{cookiecutter.project_slug}}/scenes/npc.tscn`
-- Script: `{{cookiecutter.project_slug}}/scripts/npc.gd`
-- Level scenes override the `AnimatedSprite2D.sprite_frames` property
-- Animation switching triggered by `show_speech_bubble()` and `hide_speech_bubble()`
-- Connected to `body_entered` and `body_exited` signals
-
-## Platformer Features
-
-### Physics System
-- **Gravity**: Constant downward force (default: 980 pixels/second²)
-- **Jump**: Upward velocity impulse (default: -500 pixels/second)
-- **Ground Detection**: Uses `is_on_floor()` to allow jumping only when on platforms
-- **Horizontal Movement**: 300 pixels/second default speed with friction
-
-### Camera System
-- **Following Camera**: Camera2D attached to player, follows horizontal movement
-- **Look-Ahead Offset**: Camera positioned 200 pixels ahead of player for better view
-- **Smooth Motion**: Position smoothing enabled at 5.0 speed for fluid camera movement
-- **Boundaries**: Camera limits set to 0-3000 horizontal, 0-648 vertical
-
-### Platform Generation
-- **Ground Platform**: 3000-pixel wide ground surface for side-scrolling
-- **Jump Platforms**: 6-8 platforms automatically placed at varying heights
-- **Platform Spacing**: 400 pixels apart horizontally
-- **Height Variation**: Platforms alternate between 250, 350, and 450 pixel heights
-- **Scalable**: Platforms can be scaled to different widths for level design variety
-
-### Collectible Placement
-- **Platform-Aware**: Collectibles placed 100 pixels above platforms
-- **Distribution**: Automatically distributed across jump platforms
-- **Multiple Per Platform**: Extra collectibles get slight horizontal offset for variety
-
-## Customization Ideas
-
-- **Custom Player**: Use `custom_player_svgs` to provide unique character designs for each player type (warrior, mage, rogue, etc.)
-- **Platform Variety**: Modify `generate_platform_layout()` in `hooks/post_gen_project.py` to create different platform patterns
-- **Physics Tuning**: Adjust gravity, jump_velocity, and speed in player.gd for different game feel
-- **Game Modes**: Mix and match game modes with different time limits and target scores for varied gameplay
-- **Multi-Level Adventures**: Use the level configuration system to create progressive platforming campaigns
-- **Themed Levels**: Design levels with unique visual themes, platform arrangements, and NPCs
-- **Collectible Variety**: Add different types of collectibles with varying point values
-- **Sound Effects**: Add audio when jumping, landing, or collecting objects
-- **Enemies**: Create enemy characters that patrol platforms
-- **Power-ups**: Add double-jump, speed boosts, or temporary flight abilities
-- **Moving Platforms**: Extend platform scene to support AnimatableBody2D for moving platforms
-- **Hazards**: Add spikes, pits, or other obstacles to avoid
-
-## Testing
-
-The template includes unit tests in the `tests/` folder using [GUT (Godot Unit Test)](https://github.com/bitwes/Gut). To run tests:
-
-1. Install the GUT addon from Godot's AssetLib (search for "GUT") or from [GitHub](https://github.com/bitwes/Gut)
-2. Replace the `addons/gut/` folder with the full GUT addon
-3. Enable the plugin in Project Settings > Plugins
-4. Configure test directories in the GUT panel:
-   - Click the **GUT** tab in the bottom panel
-   - Click the **settings gear icon** on the right
-   - Under **Directories**, add: `res://tests`
-   - Check **Include Subdirs** if desired
-5. Click **Run All** to run tests
-
-A `.gutconfig.json` file is included for command-line testing:
-```bash
-godot --headless -s addons/gut/gut_cmdln.gd
 ```
 
 ## Controls
 
-### Player Selection
-- **Arrow Keys** (←/→ or ↑/↓): Navigate between player options
-- **ENTER** or **SPACE**: Start the game with selected player
-- **Mouse Click**: Click buttons to select or start
+- **Arrow Keys** or **A/D**: Move left/right
+- **SPACE** or **W** or **UP**: Jump
+- **Any Key**: Restart after game over
 
-### Platformer Gameplay
-- **Left/Right Arrow Keys** or **A/D**: Move the player character horizontally
-- **SPACE** or **UP Arrow** or **W**: Jump
-- **Physics**: Gravity automatically pulls the player down, can only jump when on the ground
+## Documentation
 
-### Game Over
-- **Any Key** (SPACE, ENTER, or arrows): Restart the game
+📚 **Full documentation is available in the [docs/](docs/) directory.**
+
+### GitHub Pages
+
+Documentation is automatically built and deployed to GitHub Pages on every push to `main`.
+
+**To enable GitHub Pages for your fork:**
+
+1. Go to your repository **Settings** → **Pages**
+2. Under **Source**, select **GitHub Actions**
+3. Push to `main` branch - the workflow will build and deploy automatically
+4. Your docs will be available at `https://username.github.io/repository-name/`
+
+### Local Development
+
+To browse the documentation locally with MkDocs:
+
+```bash
+# Install mkdocs
+pip install mkdocs mkdocs-material
+
+# Serve documentation
+mkdocs serve
+
+# Open http://127.0.0.1:8000 in your browser
+```
+
+### Quick Links
+
+- [📖 Installation Guide](docs/installation.md) - Get started with prerequisites
+- [⚡ Quick Start](docs/quick-start.md) - Generate your first game in 5 minutes
+- [⚙️ Configuration Guide](docs/configuration.md) - All configuration parameters
+- [🎯 Level Configuration](docs/levels.md) - Create custom levels
+- [🎮 Controls](docs/controls.md) - Player controls and input
+- [🏃 Platformer Features](docs/platformer.md) - Physics system details
+- [🎬 Animation System](docs/animations.md) - Sprite animations
+- [📐 Collectible Layouts](docs/layouts.md) - 8 layout patterns
+- [💡 Examples](docs/examples.md) - Configuration examples
+- [🎨 Customization](docs/customization.md) - Modify your game
+- [✅ Testing](docs/testing.md) - Unit testing with GUT
+- [📁 Project Structure](docs/structure.md) - File organization
+
+## What Gets Generated
+
+```
+your_project/
+├── project.godot          # Godot project file
+├── scenes/                # Game scenes
+│   ├── player.tscn       # Player character
+│   ├── platform.tscn     # Platforms
+│   ├── collectible.tscn  # Collectibles
+│   ├── npc.tscn          # NPCs
+│   └── level_*.tscn      # Levels
+├── scripts/               # GDScript files
+│   ├── player.gd         # Player physics
+│   ├── game_manager.gd   # Game logic
+│   └── level_manager.gd  # Level transitions
+├── assets/                # Graphics and audio
+│   ├── player_*.svg      # Player sprites
+│   ├── level_*_npc.svg   # NPC sprites
+│   └── victory.wav       # Victory sound
+└── tests/                 # Unit tests
+    └── test_*.gd
+```
+
+## Game Modes
+
+- **Endless**: Play at your own pace to reach the target score
+- **Timed**: Race against the clock
+- **Score Target**: Pure score focus
+
+All modes support multi-level progression with player persistence.
+
+## Customization Quick Tips
+
+### Change Player Speed
+```gdscript
+# In scripts/player.gd
+@export var speed = 400.0  # Default: 300.0
+```
+
+### Change Jump Height
+```gdscript
+@export var jump_velocity = -900.0  # Default: -700.0
+```
+
+### Change Background Color
+```json
+{
+  "background_color": "#FF0000"
+}
+```
+
+See [Customization Guide](docs/customization.md) for more options.
+
+## Testing
+
+The template includes unit tests using [GUT (Godot Unit Test)](https://github.com/bitwes/Gut).
+
+Run tests:
+```bash
+godot --headless -s addons/gut/gut_cmdln.gd
+```
+
+See [Testing Guide](docs/testing.md) for details.
+
+## Examples
+
+### RPG Adventure
+```bash
+cookiecutter . \
+  project_name="RPG Quest" \
+  player_types="warrior,mage,rogue" \
+  custom_player_svgs="warrior:~/warrior.svg,mage:~/mage.svg,rogue:~/rogue.svg" \
+  level_count="3"
+```
+
+### Speed Runner
+```bash
+cookiecutter . \
+  project_name="Speed Runner" \
+  game_mode="timed" \
+  time_limit="30" \
+  target_score="50" \
+  include_npc="no"
+```
+
+More examples in [Examples Guide](docs/examples.md).
+
+## Contributing
+
+Feel free to fork and customize this template for your own needs!
 
 ## License
 
 This template is provided as-is for educational and commercial use.
 
-## Contributing
+## Links
 
-Feel free to fork and customize this template for your own needs!
+- [Godot Engine](https://godotengine.org/)
+- [Cookiecutter](https://cookiecutter.readthedocs.io/)
+- [GUT Testing Framework](https://github.com/bitwes/Gut)
+
+---
+
+**Need Help?** Check the [full documentation](docs/) or open an issue!

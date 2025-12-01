@@ -1,0 +1,63 @@
+site_name: Godot 4 2D Platformer Builder
+site_description: A CookieCutter template for creating side-scrolling 2D platformer games in Godot 4
+site_author: Ken Jenney
+repo_url: https://github.com/anthropics/claude-code
+repo_name: cookiecutter-godot
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quick-start.md
+    - Controls: controls.md
+  - Configuration:
+    - Overview: configuration.md
+    - Level Configuration: levels.md
+    - Examples: examples.md
+  - Features:
+    - Platformer Physics: platformer.md
+    - Animation System: animations.md
+    - Collectible Layouts: layouts.md
+  - Advanced:
+    - Customization: customization.md
+    - Testing: testing.md
+  - Reference:
+    - Project Structure: structure.md
