@@ -171,7 +171,12 @@ func test_timed_mode_does_not_countdown_before_game_starts():
 	assert_eq(game_manager_instance.time_remaining, 10.0, "Time should not decrease before game starts")
 
 func test_score_target_mode_win_condition():
-	add_child_autoqfree(game_manager_instance)
+	# Set game mode and scores before adding to tree
+	game_manager_instance.game_mode = "score_target"
+	game_manager_instance.target_score = 100
+	game_manager_instance.game_started = true
+	game_manager_instance.game_over = false
+	game_manager_instance.score = 0
 
 	# Create mock UI layer to avoid null reference errors
 	var mock_ui = CanvasLayer.new()
@@ -182,16 +187,19 @@ func test_score_target_mode_win_condition():
 	game_manager_instance.add_child(mock_ui)
 	game_manager_instance.ui_layer = mock_ui
 
-	game_manager_instance.game_mode = "score_target"
-	game_manager_instance.target_score = 100
-	game_manager_instance.game_started = true
-	game_manager_instance.game_over = false
+	# Add to tree after setup
+	add_child_autoqfree(game_manager_instance)
+
+	# Wait for tree to process
+	await get_tree().process_frame
 
 	# Add score to reach target
 	game_manager_instance.add_score(50)
+	assert_eq(game_manager_instance.score, 50, "Score should be 50")
 	assert_false(game_manager_instance.game_over, "Game should not be over before reaching target")
 
 	game_manager_instance.add_score(50)
+	assert_eq(game_manager_instance.score, 100, "Score should be 100")
 	assert_true(game_manager_instance.game_over, "Game should be over when target score is reached")
 	assert_true(get_tree().paused, "Game tree should be paused when target is reached")
 

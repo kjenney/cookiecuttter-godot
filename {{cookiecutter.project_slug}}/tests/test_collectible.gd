@@ -39,12 +39,21 @@ func test_collectible_queues_for_deletion_on_player():
 	var mock_player = CharacterBody2D.new()
 	mock_player.name = "Player"
 	add_child_autoqfree(mock_player)
+
+	# Create a mock scene tree with a current_scene that has add_score method
+	var mock_scene = Node.new()
+	mock_scene.set_script(GDScript.new())
+	mock_scene.set("add_score", func(points): pass)
+	get_tree().current_scene = mock_scene
+	add_child_autoqfree(mock_scene)
+
 	add_child_autoqfree(collectible_instance)
 
 	# Execute: Simulate player entering collectible area
 	collectible_instance._on_body_entered(mock_player)
 
-	# Wait for deferred call to process (call_deferred("queue_free") happens next frame)
+	# Wait for deferred calls to process
+	await get_tree().process_frame
 	await get_tree().process_frame
 
 	# Verify: Collectible should be queued for deletion after player collection
