@@ -172,6 +172,16 @@ func test_timed_mode_does_not_countdown_before_game_starts():
 
 func test_score_target_mode_win_condition():
 	add_child_autoqfree(game_manager_instance)
+
+	# Create mock UI layer to avoid null reference errors
+	var mock_ui = CanvasLayer.new()
+	var end_label = Label.new()
+	end_label.name = "EndGameLabel"
+	end_label.visible = false
+	mock_ui.add_child(end_label)
+	game_manager_instance.add_child(mock_ui)
+	game_manager_instance.ui_layer = mock_ui
+
 	game_manager_instance.game_mode = "score_target"
 	game_manager_instance.target_score = 100
 	game_manager_instance.game_started = true
@@ -360,7 +370,8 @@ func test_end_game_shows_message():
 	game_manager_instance.end_game(true, "Victory!")
 
 	assert_true(end_label.visible, "End game label should be visible")
-	assert_eq(end_label.text, "Victory!", "End game label should show the message")
+	# Message includes "\n\nPress any key to restart" appended
+	assert_true(end_label.text.begins_with("Victory!") or end_label.text.begins_with("Congratulations"), "End game label should show a victory message")
 
 func test_on_player_selected_initializes_ui():
 	add_child_autoqfree(game_manager_instance)

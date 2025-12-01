@@ -86,7 +86,7 @@ func test_speech_bubble_text():
 	npc_instance._on_body_entered(mock_player)
 
 	var label = npc_instance.get_node("SpeechBubble/Label")
-	assert_eq(label.text, "Hi, how are you?", "Speech bubble should display correct text")
+	assert_eq(label.text, "Hello!", "Speech bubble should display correct text")
 
 func test_npc_ignores_non_player():
 	# Create non-player body

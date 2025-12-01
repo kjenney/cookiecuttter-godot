@@ -44,6 +44,9 @@ func test_collectible_queues_for_deletion_on_player():
 	# Execute: Simulate player entering collectible area
 	collectible_instance._on_body_entered(mock_player)
 
+	# Wait for deferred call to process (call_deferred("queue_free") happens next frame)
+	await get_tree().process_frame
+
 	# Verify: Collectible should be queued for deletion after player collection
 	assert_true(collectible_instance.is_queued_for_deletion(),
 		"Collectible should be queued for deletion after player collects it")
