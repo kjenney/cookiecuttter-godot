@@ -199,12 +199,26 @@ See [Customization Guide](docs/customization.md) for more options.
 
 The template includes unit tests using [GUT (Godot Unit Test)](https://github.com/bitwes/Gut).
 
-Run tests:
+### Local Testing
+
+Run tests locally:
 ```bash
-godot --headless -s addons/gut/gut_cmdln.gd
+godot --headless -s addons/gut/gut_cmdln.gd -gexit
 ```
 
-See [Testing Guide](docs/testing.md) for details.
+### Continuous Integration
+
+Each generated project includes a **GitHub Actions workflow** that automatically runs tests on push and pull requests.
+
+**Features:**
+- ✅ Automatic testing in CI/CD
+- ✅ Godot binary caching
+- ✅ Test result summaries
+- ✅ Downloadable test logs
+
+**To enable:** Push your project to GitHub and the workflow runs automatically!
+
+See [Testing Guide](docs/testing.md) for complete details on headless testing, CI/CD integration, and more.
 
 ## Examples
 

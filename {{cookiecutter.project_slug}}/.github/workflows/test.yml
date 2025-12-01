@@ -1,0 +1,115 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "{{ cookiecutter.godot_version }}"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            godot
+            .godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ runner.os }}
+          restore-keys: |
+            godot-${{ env.GODOT_VERSION }}-
+
+      - name: Download Godot Engine
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          # Determine Godot download URL based on version
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64.zip"
+
+          # Download and extract
+          wget -q $GODOT_URL -O godot.zip
+          unzip -q godot.zip
+          chmod +x Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64
+          mv Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64 godot
+
+      - name: Verify GUT installation
+        run: |
+          if [ ! -d "addons/gut" ]; then
+            echo "ERROR: GUT addon not found!"
+            echo "Please install GUT to the addons/gut directory."
+            echo "See: https://github.com/bitwes/Gut"
+            exit 1
+          fi
+          echo "GUT addon found ✓"
+
+      - name: Import project
+        run: |
+          # Import the project (generates .godot/imported assets)
+          ./godot --headless --editor --quit || true
+          sleep 5
+
+      - name: Run unit tests
+        id: run-tests
+        run: |
+          # Run GUT tests in headless mode
+          ./godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit 2>&1 | tee test_output.log
+
+          # Check exit code
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          # Parse results
+          if grep -q "All tests passed" test_output.log; then
+            echo "✓ All tests passed!"
+            echo "test_result=success" >> $GITHUB_OUTPUT
+          elif grep -q "Tests Failed" test_output.log; then
+            echo "✗ Some tests failed"
+            echo "test_result=failure" >> $GITHUB_OUTPUT
+          else
+            echo "⚠ Could not determine test status"
+            echo "test_result=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: test_output.log
+          retention-days: 7
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.run-tests.outputs.test_result }}" == "success" ]; then
+            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.run-tests.outputs.test_result }}" == "failure" ]; then
+            echo "❌ Some tests failed. Check the logs for details." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Test status unknown. Check the logs." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See the full logs in the artifacts." >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if tests failed
+        if: steps.run-tests.outputs.exit_code != '0'
+        run: |
+          echo "Tests failed with exit code ${{ steps.run-tests.outputs.exit_code }}"
+          exit 1

@@ -423,32 +423,242 @@ func test_level_has_platforms():
     assert_gt(platforms.size(), 0, "Level should have platforms")
 ```
 
+## Headless Testing
+
+GUT supports headless (no GUI) execution, perfect for CI/CD pipelines.
+
+### Command Line Headless Testing
+
+Run tests without opening Godot editor:
+
+```bash
+# Basic headless test run
+godot --headless --path . -s addons/gut/gut_cmdln.gd
+
+# Exit after tests complete
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+
+# Verbose output
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gverbose
+
+# Run specific test file
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_player.gd
+
+# Run specific test method
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_player.gd:test_jump
+```
+
+### Command Line Options
+
+GUT supports many command-line parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `-gtest=<path>` | Run specific test file or method |
+| `-gverbose` | Verbose output |
+| `-gexit` | Exit after tests complete |
+| `-glog=<level>` | Set log level (0-3) |
+| `-gdisable_colors` | Disable colored output |
+| `-gpre_run_script=<path>` | Script to run before tests |
+| `-gpost_run_script=<path>` | Script to run after tests |
+| `-gdir=<path>` | Test directory |
+
+### Exit Codes
+
+GUT returns meaningful exit codes for CI:
+
+- **0**: All tests passed
+- **1**: Some tests failed
+- **2**: Script errors occurred
+
 ## Continuous Integration
 
-### GitHub Actions
+### GitHub Actions (Included)
 
-**.github/workflows/test.yml:**
+Every generated project includes a GitHub Actions workflow at `.github/workflows/test.yml`.
+
+**Features:**
+- ✅ Automatic testing on push and pull requests
+- ✅ Godot binary caching for faster runs
+- ✅ Test result summaries
+- ✅ Artifact uploads for test logs
+- ✅ Proper failure reporting
+
+**To enable:**
+
+1. Ensure GUT addon is installed in `addons/gut/`
+2. Push your project to GitHub
+3. Workflow runs automatically on push/PR
+
+**View results:**
+- Go to **Actions** tab in your GitHub repository
+- Click on a workflow run to see results
+- Download test logs from artifacts
+
+### Manual Workflow Trigger
+
+You can manually trigger tests:
+
+1. Go to **Actions** tab
+2. Select **Run Unit Tests** workflow
+3. Click **Run workflow**
+4. Select branch and run
+
+### Workflow Configuration
+
+The workflow is pre-configured but can be customized in `.github/workflows/test.yml`:
 
 ```yaml
-name: Run Tests
+env:
+  GODOT_VERSION: "4.5"  # Change Godot version here
+```
 
-on: [push, pull_request]
+**Common customizations:**
+- Change Godot version
+- Add/remove trigger branches
+- Modify caching strategy
+- Add deployment steps after tests pass
+
+### Local CI Testing
+
+Test the CI workflow locally before pushing:
+
+```bash
+# Install act (GitHub Actions local runner)
+# macOS: brew install act
+# Linux: curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Run the test workflow locally
+act -j unit-tests
+```
+
+### Other CI Platforms
+
+#### GitLab CI
+
+**.gitlab-ci.yml:**
+
+```yaml
+test:
+  image: ubuntu:latest
+  before_script:
+    - apt-get update
+    - apt-get install -y wget unzip
+    - wget https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+    - unzip Godot_v4.5-stable_linux.x86_64.zip
+    - chmod +x Godot_v4.5-stable_linux.x86_64
+  script:
+    - ./Godot_v4.5-stable_linux.x86_64 --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+  artifacts:
+    when: always
+    paths:
+      - .godot/
+```
+
+#### Circle CI
+
+**.circleci/config.yml:**
+
+```yaml
+version: 2.1
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    docker:
+      - image: ubuntu:latest
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Download Godot
-        run: |
-          wget https://downloads.tuxfamily.org/godotengine/4.5/Godot_v4.5-stable_linux.x86_64.zip
-          unzip Godot_v4.5-stable_linux.x86_64.zip
-          chmod +x Godot_v4.5-stable_linux.x86_64
-      
-      - name: Run GUT Tests
-        run: |
-          ./Godot_v4.5-stable_linux.x86_64 --headless -s addons/gut/gut_cmdln.gd
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y wget unzip
+      - run:
+          name: Download Godot
+          command: |
+            wget https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+            unzip Godot_v4.5-stable_linux.x86_64.zip
+            chmod +x Godot_v4.5-stable_linux.x86_64
+      - run:
+          name: Run tests
+          command: |
+            ./Godot_v4.5-stable_linux.x86_64 --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+```
+
+### Docker Testing
+
+Create a Dockerfile for consistent testing environment:
+
+**Dockerfile:**
+
+```dockerfile
+FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download Godot
+RUN wget https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip && \
+    unzip Godot_v4.5-stable_linux.x86_64.zip && \
+    mv Godot_v4.5-stable_linux.x86_64 /usr/local/bin/godot && \
+    chmod +x /usr/local/bin/godot && \
+    rm Godot_v4.5-stable_linux.x86_64.zip
+
+WORKDIR /project
+
+# Copy project files
+COPY . .
+
+# Run tests
+CMD ["godot", "--headless", "--path", ".", "-s", "addons/gut/gut_cmdln.gd", "-gexit"]
+```
+
+**Build and run:**
+
+```bash
+# Build Docker image
+docker build -t my-game-tests .
+
+# Run tests
+docker run --rm my-game-tests
+```
+
+### Pre-commit Hooks
+
+Run tests before allowing commits:
+
+**.git/hooks/pre-commit:**
+
+```bash
+#!/bin/bash
+
+echo "Running tests before commit..."
+
+# Run tests
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+
+# Check exit code
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed! Commit aborted."
+    exit 1
+fi
+
+echo "✅ All tests passed!"
+exit 0
+```
+
+Make executable:
+```bash
+chmod +x .git/hooks/pre-commit
 ```
 
 ## Debugging Tests
