@@ -1,57 +1,153 @@
-# {{cookiecutter.project_name}}
+# {{ cookiecutter.project_name }}
 
-A simple 2D collectible game built with Godot 4.
+A 2D platformer game created with the [Godot 4 2D Platformer Builder](https://github.com/kjenney/cookiecutter-godot) template.
 
-**Author**: {{cookiecutter.author_name}}
+## Quick Start
 
-## About
+1. **Open in Godot**
+   ```bash
+   godot project.godot
+   ```
 
-This is a basic 2D game where you control a character that moves around collecting objects. It was created from a Godot 4 CookieCutter template.
-
-## How to Play
-
-1. Open this project in Godot {{cookiecutter.godot_version}} or later
-2. Press F5 or click the Play button
-3. Select your player type (Blue, Red, or Green) from the menu
-4. Click "Start Game" to begin
-5. Use WASD or Arrow keys to move your character
-6. Collect the golden objects scattered around the level
-7. Watch your score increase in the console output
-
-## Project Structure
-
-- `scenes/` - Contains all scene files (.tscn)
-  - `player.tscn` - The player character
-  - `collectible.tscn` - Collectible objects
-  - `main.tscn` - Main game scene
-  - `player_select.tscn` - Player selection menu
-- `scripts/` - Contains all GDScript files (.gd)
-  - `player.gd` - Player movement logic
-  - `collectible.gd` - Collectible behavior
-  - `game_manager.gd` - Game state and score tracking
-  - `player_select.gd` - Player selection menu logic
-- `assets/` - Place your game assets here (sprites, sounds, etc.)
-
-## Next Steps
-
-Here are some ideas to expand this game:
-
-1. **Add Custom Graphics**: Replace the placeholder icon with custom sprites
-2. **Create a UI**: Add an on-screen score display using a Label in a CanvasLayer
-3. **Add Sound Effects**: Import audio files and play them when collecting objects
-4. **Create More Levels**: Design new scenes with different layouts
-5. **Add Obstacles**: Create walls or barriers using StaticBody2D
-6. **Implement Enemies**: Add moving enemies that the player must avoid
-7. **Add Power-ups**: Create special collectibles with unique effects
+2. **Run the game**
+   - Press **F5** or click the **Play** button
+   - Select your player type
+   - Use **Arrow Keys** or **A/D** to move
+   - Press **SPACE** to jump
 
 ## Controls
 
-- **Arrow Keys** or **WASD**: Move the player
+- **Arrow Keys** or **A/D**: Move left/right
+- **SPACE** or **W** or **UP**: Jump
+- **Any Key**: Restart after game over
+
+## Project Details
+
+- **Game Mode**: {{ cookiecutter.game_mode }}
+{% if cookiecutter.game_mode == "timed" -%}
+- **Time Limit**: {{ cookiecutter.time_limit }} seconds
+{% endif -%}
+- **Target Score**: {{ cookiecutter.target_score }}
+- **Levels**: {{ cookiecutter.level_count }}
+- **Player Types**: {{ cookiecutter.player_types }}
+
+## Testing
+
+This project includes unit tests using [GUT (Godot Unit Test)](https://github.com/bitwes/Gut).
+
+### Install GUT
+
+Before running tests, install the GUT addon:
+
+1. **Via AssetLib** (Easiest):
+   - Open Godot
+   - Click **AssetLib** tab
+   - Search for "GUT"
+   - Download and install
+
+2. **Via GitHub** (Manual):
+   ```bash
+   # Download GUT
+   wget -O gut.zip https://github.com/bitwes/Gut/archive/refs/tags/v9.3.0.zip
+   unzip gut.zip
+
+   # Copy to addons
+   mkdir -p addons
+   cp -r Gut-9.3.0/addons/gut addons/
+
+   # Clean up
+   rm -rf gut.zip Gut-9.3.0
+   ```
+
+3. **Enable Plugin**:
+   - **Project → Project Settings → Plugins**
+   - Check **Enable** next to "Gut"
+
+### Run Tests
+
+**In Godot Editor:**
+1. Click **GUT** tab at bottom
+2. Click **Run All**
+
+**Command Line:**
+```bash
+godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+```
+
+### Continuous Integration
+
+This project includes a GitHub Actions workflow that automatically runs tests on push and pull requests.
+
+**To enable:**
+1. Install and commit GUT addon to the repository
+2. Push your project to GitHub
+3. Tests run automatically
+4. View results in the **Actions** tab
+
+**Important:** GUT addon must be in the repository for CI to work!
+
+## Project Structure
+
+```
+{{ cookiecutter.project_slug }}/
+├── project.godot          # Godot project configuration
+├── scenes/                # Game scenes
+│   ├── player.tscn       # Player character
+│   ├── platform.tscn     # Platforms
+│   ├── collectible.tscn  # Collectible items
+{% if cookiecutter.include_npc == "yes" -%}
+│   ├── npc.tscn          # NPCs
+{% endif -%}
+{% if cookiecutter.level_count|int > 1 -%}
+│   ├── level_1.tscn      # Levels
+│   └── ...
+{% else -%}
+│   └── main.tscn         # Main game scene
+{% endif -%}
+├── scripts/               # Game logic
+│   ├── player.gd         # Player physics
+│   ├── game_manager.gd   # Game state
+{% if cookiecutter.level_count|int > 1 -%}
+│   └── level_manager.gd  # Level transitions
+{% endif -%}
+├── assets/                # Graphics and audio
+│   ├── player_*.svg      # Player sprites
+{% if cookiecutter.include_npc == "yes" -%}
+│   ├── npc*.svg          # NPC sprites
+{% endif -%}
+│   └── victory.wav       # Victory sound
+└── tests/                 # Unit tests
+    ├── test_player.gd
+    └── ...
+```
+
+## Customization
+
+### Change Physics
+
+Edit `scripts/player.gd`:
+
+```gdscript
+@export var speed = 300.0         # Movement speed
+@export var jump_velocity = -700.0  # Jump height
+@export var gravity = 980.0       # Gravity strength
+```
+
+### Change Colors
+
+Edit level backgrounds in scene files or `levels_config.json`.
+
+### Add More Levels
+{% if cookiecutter.level_count|int > 1 -%}
+Edit `levels_config.json` to add or modify levels.
+{% else -%}
+Regenerate the project with `level_count` > 1.
+{% endif -%}
+
+## Documentation
+
+Full documentation: [Godot 4 2D Platformer Builder Docs](https://kjenney.github.io/cookiecutter-godot/)
 
 ## License
 
-Add your license information here.
-
----
-
-Happy game development!
+This project was generated from the Godot 4 2D Platformer Builder template.

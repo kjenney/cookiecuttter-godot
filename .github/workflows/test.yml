@@ -36,18 +36,24 @@ jobs:
 
       - name: Install GUT addon
         run: |
-          # Create addons directory structure if it doesn't exist
-          mkdir -p addons/gut
-
           # Download GUT from GitHub
-          wget -O gut.zip https://github.com/bitwes/Gut/archive/refs/tags/v9.3.0.zip
-          unzip gut.zip
+          wget -q -O gut.zip https://github.com/bitwes/Gut/archive/refs/tags/v9.3.0.zip
+          unzip -q gut.zip
 
-          # Copy GUT files to addons directory
-          cp -r Gut-9.3.0/addons/gut/* addons/gut/
+          # Create addons directory and copy GUT
+          mkdir -p addons
+          cp -r Gut-9.3.0/addons/gut addons/
 
           # Clean up
           rm -rf gut.zip Gut-9.3.0
+
+          # Verify installation
+          if [ -f "addons/gut/gut_cmdln.gd" ]; then
+            echo "✓ GUT installed successfully"
+          else
+            echo "✗ GUT installation failed"
+            exit 1
+          fi
 
       - name: Generate test project
         run: |
@@ -65,7 +71,22 @@ jobs:
           cd test_project
 
           # Copy GUT addon to generated project
+          mkdir -p addons
           cp -r ../addons/gut addons/
+
+          # Verify GUT was copied
+          if [ -f "addons/gut/gut_cmdln.gd" ]; then
+            echo "✓ GUT addon found in test project"
+          else
+            echo "✗ GUT addon missing in test project"
+            ls -la addons/
+            exit 1
+          fi
+
+          # Import project first to generate .godot directory
+          echo "Importing project..."
+          ../godot --headless --editor --quit || true
+          sleep 3
 
           # Run tests in headless mode
           ../godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
