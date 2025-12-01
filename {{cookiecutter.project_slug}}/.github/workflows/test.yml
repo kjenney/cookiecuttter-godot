@@ -29,21 +29,24 @@ jobs:
           path: |
             godot
             .godot
-          key: godot-${{ env.GODOT_VERSION }}-${{ runner.os }}
+          key: {% raw %}godot-${{ env.GODOT_VERSION }}-${{ runner.os }}{% endraw %}
+
           restore-keys: |
-            godot-${{ env.GODOT_VERSION }}-
+            {% raw %}godot-${{ env.GODOT_VERSION }}-{% endraw %}
+
 
       - name: Download Godot Engine
-        if: steps.cache-godot.outputs.cache-hit != 'true'
+        if: {% raw %}steps.cache-godot.outputs.cache-hit != 'true'{% endraw %}
+
         run: |
           # Determine Godot download URL based on version
-          GODOT_URL="https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-stable/Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64.zip"
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/{% raw %}${{ env.GODOT_VERSION }}{% endraw %}-stable/Godot_v{% raw %}${{ env.GODOT_VERSION }}{% endraw %}-stable_linux.x86_64.zip"
 
           # Download and extract
           wget -q $GODOT_URL -O godot.zip
           unzip -q godot.zip
-          chmod +x Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64
-          mv Godot_v${{ env.GODOT_VERSION }}-stable_linux.x86_64 godot
+          chmod +x Godot_v{% raw %}${{ env.GODOT_VERSION }}{% endraw %}-stable_linux.x86_64
+          mv Godot_v{% raw %}${{ env.GODOT_VERSION }}{% endraw %}-stable_linux.x86_64 godot
 
       - name: Verify GUT installation
         run: |
@@ -69,18 +72,21 @@ jobs:
 
           # Check exit code
           EXIT_CODE=${PIPESTATUS[0]}
-          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "exit_code=$EXIT_CODE" >> {% raw %}$GITHUB_OUTPUT{% endraw %}
 
           # Parse results
           if grep -q "All tests passed" test_output.log; then
             echo "✓ All tests passed!"
-            echo "test_result=success" >> $GITHUB_OUTPUT
+            echo "test_result=success" >> {% raw %}$GITHUB_OUTPUT{% endraw %}
+
           elif grep -q "Tests Failed" test_output.log; then
             echo "✗ Some tests failed"
-            echo "test_result=failure" >> $GITHUB_OUTPUT
+            echo "test_result=failure" >> {% raw %}$GITHUB_OUTPUT{% endraw %}
+
           else
             echo "⚠ Could not determine test status"
-            echo "test_result=unknown" >> $GITHUB_OUTPUT
+            echo "test_result=unknown" >> {% raw %}$GITHUB_OUTPUT{% endraw %}
+
           fi
 
       - name: Upload test logs
@@ -94,22 +100,30 @@ jobs:
       - name: Test summary
         if: always()
         run: |
-          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results 🧪" >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
 
-          if [ "${{ steps.run-tests.outputs.test_result }}" == "success" ]; then
-            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.run-tests.outputs.test_result }}" == "failure" ]; then
-            echo "❌ Some tests failed. Check the logs for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
+
+          if [ "{% raw %}${{ steps.run-tests.outputs.test_result }}{% endraw %}" == "success" ]; then
+            echo "✅ All tests passed!" >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
+          elif [ "{% raw %}${{ steps.run-tests.outputs.test_result }}{% endraw %}" == "failure" ]; then
+            echo "❌ Some tests failed. Check the logs for details." >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
           else
-            echo "⚠️ Test status unknown. Check the logs." >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ Test status unknown. Check the logs." >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
           fi
 
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "See the full logs in the artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "" >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
+          echo "See the full logs in the artifacts." >> {% raw %}$GITHUB_STEP_SUMMARY{% endraw %}
+
 
       - name: Fail if tests failed
-        if: steps.run-tests.outputs.exit_code != '0'
+        if: {% raw %}steps.run-tests.outputs.exit_code != '0'{% endraw %}
+
         run: |
-          echo "Tests failed with exit code ${{ steps.run-tests.outputs.exit_code }}"
+          echo "Tests failed with exit code {% raw %}${{ steps.run-tests.outputs.exit_code }}{% endraw %}"
           exit 1
