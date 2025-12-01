@@ -35,18 +35,28 @@ func test_collectible_ignores_non_player():
 		"Collectible should not be queued for deletion when non-player body enters")
 
 func test_collectible_queues_for_deletion_on_player():
-	# Setup
+	# Setup mock player
 	var mock_player = CharacterBody2D.new()
 	mock_player.name = "Player"
 	add_child_autoqfree(mock_player)
 
-	# Create a mock scene tree with a current_scene that has add_score method
-	var mock_scene = Node.new()
-	mock_scene.set_script(GDScript.new())
-	mock_scene.set("add_score", func(points): pass)
-	get_tree().current_scene = mock_scene
-	add_child_autoqfree(mock_scene)
+	# Create a mock main scene with add_score method
+	var GameManagerScript = GDScript.new()
+	GameManagerScript.source_code = """
+extends Node
+func add_score(points):
+	pass
+"""
+	GameManagerScript.reload()
 
+	var mock_main_scene = Node.new()
+	mock_main_scene.set_script(GameManagerScript)
+
+	# Set as current scene (must not have a parent)
+	get_tree().root.add_child(mock_main_scene)
+	get_tree().current_scene = mock_main_scene
+
+	# Add collectible to scene tree
 	add_child_autoqfree(collectible_instance)
 
 	# Execute: Simulate player entering collectible area
@@ -56,9 +66,12 @@ func test_collectible_queues_for_deletion_on_player():
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	# Verify: Collectible should be queued for deletion after player collection
+	# Verify: Collectible should be queued for deletion
 	assert_true(collectible_instance.is_queued_for_deletion(),
 		"Collectible should be queued for deletion after player collects it")
+
+	# Cleanup
+	mock_main_scene.queue_free()
 
 func test_collectible_checks_player_name():
 	# Test that collectible specifically checks for "Player" name
